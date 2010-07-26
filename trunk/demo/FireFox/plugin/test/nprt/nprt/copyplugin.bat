@@ -1,3 +1,12 @@
-copy /y ..\debug\nprt.dll "C:\Program Files\Mozilla Firefox\plugins\nprt.dll"
-echo "To see the debug console, close all existed firefox.exe instances."
-"C:\Program Files\Mozilla Firefox\firefox.exe" ".\test.html" -console
+echo "build xpi"
+mkdir xpi
+mkdir xpi\plugins
+copy /y ..\debug\nprt.dll xpi\plugins
+copy /y .\install.rdf xpi\
+cd xpi
+jar cvfM ..\nprt.xpi -C ./ *.*
+cd ..
+
+rmdir /q /s xpi
+echo "open nprt.xpi with firefox and plugin will be installed into :"
+echo "<disk>:\Documents and Settings\<user_name>\Application Data\Mozilla\Firefox\Profiles\<profile_name>\extensions\"
