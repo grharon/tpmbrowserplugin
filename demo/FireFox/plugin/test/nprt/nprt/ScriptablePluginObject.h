@@ -2,15 +2,18 @@
 #define SCRIPTABLEPLUGINOBJECT_H
 #include "ScriptablePluginObjectBase.h"
 
-static NPIdentifier sFoo_id;
-static NPIdentifier sBar_id;
-static NPIdentifier sDocument_id;
-static NPIdentifier sBody_id;
-static NPIdentifier sCreateElement_id;
-static NPIdentifier sCreateTextNode_id;
-static NPIdentifier sAppendChild_id;
-static NPIdentifier sPluginType_id;
-static NPObject *sWindowObj;
+// Methods
+extern NPIdentifier sFoo_id;
+extern NPIdentifier sBar_id;
+extern NPIdentifier sPluginType_id;
+extern NPIdentifier sCreateElement_id;
+extern NPIdentifier sCreateTextNode_id;
+extern NPIdentifier sDocument_id;
+extern NPIdentifier sAppendChild_id;
+extern NPIdentifier sBody_id;
+extern NPObject *sWindowObj;
+// modified 
+extern NPIdentifier sGetURL_id;
 
 class ScriptablePluginObject : public ScriptablePluginObjectBase
 {

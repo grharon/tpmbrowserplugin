@@ -2,6 +2,7 @@
 #define CONSTRUCTABLEPLUGINOBJECT_H
 #include "ScriptablePluginObjectBase.h"
 #include <stdio.h>
+// Properties
 
 class ConstructablePluginObject : public ScriptablePluginObjectBase
 {
