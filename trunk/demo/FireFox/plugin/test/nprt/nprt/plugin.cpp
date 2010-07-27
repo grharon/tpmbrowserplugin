@@ -66,10 +66,10 @@ NPIdentifier sCreateTextNode_id;
 NPIdentifier sDocument_id;
 NPIdentifier sAppendChild_id;
 NPIdentifier sBody_id;
-NPObject *sWindowObj;
-// modified 
+// modified to transfer data, and call functions
+NPIdentifier sCode_id;
+NPIdentifier sURL_id;
 NPIdentifier sGetURL_id;
-
 
 CPlugin::CPlugin(NPP pNPInstance, char *aCode, char* aURL) :
   m_pNPInstance(pNPInstance),
@@ -82,7 +82,6 @@ CPlugin::CPlugin(NPP pNPInstance, char *aCode, char* aURL) :
 #ifdef XP_WIN
   m_hWnd = NULL;
 #endif
-
   NPN_GetValue(m_pNPInstance, NPNVWindowNPObject, &sWindowObj);
 
   // initialize id
@@ -96,8 +95,14 @@ CPlugin::CPlugin(NPP pNPInstance, char *aCode, char* aURL) :
   sCreateTextNode_id = NPN_GetStringIdentifier("createTextNode");
   sAppendChild_id = NPN_GetStringIdentifier("appendChild");
   sPluginType_id = NPN_GetStringIdentifier("PluginType");
+  
+  sGetURL_id = NPN_GetStringIdentifier("GetURL");
+  sCode_id = NPN_GetStringIdentifier("code");
+  sURL_id = NPN_GetStringIdentifier("rURL");
 
+  /* set "this" into addr */
   NPVariant v;
+
   INT32_TO_NPVARIANT(46, v);
 
   NPN_SetProperty(m_pNPInstance, sWindowObj, n, &v);
@@ -134,19 +139,29 @@ CPlugin::CPlugin(NPP pNPInstance, char *aCode, char* aURL) :
       NPN_ReleaseVariantValue(&rval);
     }
 
-	// my test script to get url
-	NPIdentifier url = NPN_GetStringIdentifier("URL");
-	if (!NPN_IdentifierIsString(n)) {
-		printf("cannot get url\n");
-	}	
-	else {
-		NPVariant rval;
-		NPN_GetProperty(m_pNPInstance, doc, url, &rval);
-		if (NPVARIANT_IS_STRING(rval)) {
-			printf("URL is %s\n",NPVARIANT_TO_STRING(rval));
-			NPN_ReleaseVariantValue(&rval);
+		// my test script to get url
+		NPIdentifier url = NPN_GetStringIdentifier("URL");
+		if (!NPN_IdentifierIsString(n)) {
+			printf("cannot get url\n");
+		}	
+		else {
+			NPVariant rval;
+			NPN_GetProperty(m_pNPInstance, doc, url, &rval);
+			if (NPVARIANT_IS_STRING(rval)) {
+				printf("URL is %s\n",NPVARIANT_TO_STRING(rval));
+				NPN_ReleaseVariantValue(&rval);
+			}
 		}
-	}
+
+    if (this->mCode) {
+		  STRINGZ_TO_NPVARIANT(mCode,v);
+		  NPN_SetProperty(m_pNPInstance, doc, sCode_id, &v);
+		}
+		if (this->mURL) {
+			STRINGZ_TO_NPVARIANT(mURL,v);
+			NPN_SetProperty(m_pNPInstance, doc, sURL_id, &v);
+		}
+
     // end of my script
     n = NPN_GetStringIdentifier("plugindoc");
 
@@ -164,6 +179,17 @@ CPlugin::CPlugin(NPP pNPInstance, char *aCode, char* aURL) :
 
   NPVariant barval;
   NPN_GetProperty(m_pNPInstance, sWindowObj, sBar_id, &barval);
+/*
+window
+->foof
+->code
+->rURL
+->bar
+->plugindoc
+->document
+--->title
+--->URL
+*/
 
   NPVariant arg;
   OBJECT_TO_NPVARIANT(sWindowObj, arg);
@@ -201,7 +227,7 @@ CPlugin::CPlugin(NPP pNPInstance, char *aCode, char* aURL) :
   NPObject *myobj =
     NPN_CreateObject(m_pNPInstance,
                      GET_NPOBJECT_CLASS(ScriptablePluginObject));
-
+	
   n = NPN_GetStringIdentifier("pluginobj");
 
   OBJECT_TO_NPVARIANT(myobj, v);
@@ -219,7 +245,6 @@ CPlugin::CPlugin(NPP pNPInstance, char *aCode, char* aURL) :
 
   NPN_ReleaseVariantValue(&rval);
   NPN_ReleaseObject(myobj);
-
   const char *ua = NPN_UserAgent(m_pNPInstance);
   strcpy(m_String, ua);
 }

@@ -11,7 +11,6 @@ extern NPIdentifier sCreateTextNode_id;
 extern NPIdentifier sDocument_id;
 extern NPIdentifier sAppendChild_id;
 extern NPIdentifier sBody_id;
-extern NPObject *sWindowObj;
 // modified 
 extern NPIdentifier sGetURL_id;
 
