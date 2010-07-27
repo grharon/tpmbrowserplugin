@@ -1,18 +1,7 @@
-#ifndef SCRIPTABLEPLUGINOBJECT_H
-#define SCRIPTABLEPLUGINOBJECT_H
 #include "ScriptablePluginObjectBase.h"
 
-// Methods
-extern NPIdentifier sFoo_id;
-extern NPIdentifier sBar_id;
-extern NPIdentifier sPluginType_id;
-extern NPIdentifier sCreateElement_id;
-extern NPIdentifier sCreateTextNode_id;
-extern NPIdentifier sDocument_id;
-extern NPIdentifier sAppendChild_id;
-extern NPIdentifier sBody_id;
-// modified 
-extern NPIdentifier sGetURL_id;
+#ifndef SCRIPTABLEPLUGINOBJECT_H
+#define SCRIPTABLEPLUGINOBJECT_H
 
 class ScriptablePluginObject : public ScriptablePluginObjectBase
 {
@@ -20,6 +9,7 @@ public:
   ScriptablePluginObject(NPP npp)
     : ScriptablePluginObjectBase(npp)
   {
+		a=17;
   }
 
   virtual bool HasMethod(NPIdentifier name);
@@ -30,6 +20,8 @@ public:
   virtual bool InvokeDefault(const NPVariant *args, uint32_t argCount,
                              NPVariant *result);
   virtual bool SetProperty(NPIdentifier name, const NPVariant *value);
+private:
+	int a;
 };
 
 static NPObject *
