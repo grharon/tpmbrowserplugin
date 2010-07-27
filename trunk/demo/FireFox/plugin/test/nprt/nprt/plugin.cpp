@@ -57,6 +57,20 @@
 #include "plugin.h"
 #include "npfunctions.h"
 
+#include "ScriptablePluginObject.h"
+NPIdentifier sFoo_id;
+NPIdentifier sBar_id;
+NPIdentifier sPluginType_id;
+NPIdentifier sCreateElement_id;
+NPIdentifier sCreateTextNode_id;
+NPIdentifier sDocument_id;
+NPIdentifier sAppendChild_id;
+NPIdentifier sBody_id;
+NPObject *sWindowObj;
+// modified 
+NPIdentifier sGetURL_id;
+
+
 CPlugin::CPlugin(NPP pNPInstance, char *aCode, char* aURL) :
   m_pNPInstance(pNPInstance),
   m_pNPStream(NULL),
@@ -71,6 +85,7 @@ CPlugin::CPlugin(NPP pNPInstance, char *aCode, char* aURL) :
 
   NPN_GetValue(m_pNPInstance, NPNVWindowNPObject, &sWindowObj);
 
+  // initialize id
   NPIdentifier n = NPN_GetStringIdentifier("foof");
 
   sFoo_id = NPN_GetStringIdentifier("foo");
@@ -101,12 +116,12 @@ CPlugin::CPlugin(NPP pNPInstance, char *aCode, char* aURL) :
     str.UTF8Characters = "alert('NPN_IdentifierIsString() test failed!');";
     str.UTF8Length = strlen(str.UTF8Characters);
 
-    NPN_Evaluate(m_pNPInstance, sWindowObj, &str, NULL);
+    NPN_Evaluate(m_pNPInstance, sWindowObj, &str, NULL);//execute a script
   }
 
   NPObject *doc;
 
-  NPN_GetProperty(m_pNPInstance, sWindowObj, n, &rval);
+  NPN_GetProperty(m_pNPInstance, sWindowObj, n, &rval);//document -> rval -> doc
 
   if (NPVARIANT_IS_OBJECT(rval) && (doc = NPVARIANT_TO_OBJECT(rval))) {
     n = NPN_GetStringIdentifier("title");
@@ -119,6 +134,20 @@ CPlugin::CPlugin(NPP pNPInstance, char *aCode, char* aURL) :
       NPN_ReleaseVariantValue(&rval);
     }
 
+	// my test script to get url
+	NPIdentifier url = NPN_GetStringIdentifier("URL");
+	if (!NPN_IdentifierIsString(n)) {
+		printf("cannot get url\n");
+	}	
+	else {
+		NPVariant rval;
+		NPN_GetProperty(m_pNPInstance, doc, url, &rval);
+		if (NPVARIANT_IS_STRING(rval)) {
+			printf("URL is %s\n",NPVARIANT_TO_STRING(rval));
+			NPN_ReleaseVariantValue(&rval);
+		}
+	}
+    // end of my script
     n = NPN_GetStringIdentifier("plugindoc");
 
     OBJECT_TO_NPVARIANT(doc, v);

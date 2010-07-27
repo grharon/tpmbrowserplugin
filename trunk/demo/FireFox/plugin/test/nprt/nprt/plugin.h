@@ -40,7 +40,6 @@
 
 #include "npapi.h"
 #include "npruntime.h"
-#include "ScriptablePluginObject.h"
 #include "fix.h"
 
 class CPlugin
