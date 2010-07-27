@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;D:\xulrunner-1.9.2.6.en-US.win32.sdk\xulrunner-sdk\include&quot;"
+				AdditionalIncludeDirectories="..\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;MOZILLA_STRICT_API;_USRDLL;XP_WIN;_X86_;XPCOM_GLUE;NPRT_EXPORTS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -211,6 +211,10 @@
 			</File>
 			<File
 				RelativePath=".\ScriptablePluginObjectBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test.bat"
 				>
 			</File>
 		</Filter>

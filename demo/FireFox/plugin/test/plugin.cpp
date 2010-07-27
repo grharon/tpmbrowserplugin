@@ -358,73 +358,28 @@ NPError nsPluginInstance::PostTest() {
 	return err;
 }
 
-// code extract from http://pcmanx-gtk2.googlecode.com/svn
-NPError NS_PluginGetValue(NPPVariable aVariable, void *aValue) {
-	NPError err = NPERR_NO_ERROR;
-	switch (aVariable) {
-		case NPPVpluginNameString:
-			*((char**)aValue) = PLUGIN_NAME;
-			break;
-		case NPPVpluginDescriptionString:
-			*((char**)aValue) = PLUGIN_DESCRIPTION;
-		default:
-			err = NPERR_INVALID_PARAM;
-			break;
-	}
-	return err;
-}
-
 /* Drawing: see CDC Members IN MSDN*/
 /*TODO:
-NPN_GetURL : retrieve data in URL
-NPN_PostURL : send data to URL
-
 NPError NPN_GetURL(NPP instance, const char *url, const char *target);
-
-The instance parameter represents the current plug-in instance. The url parameter is the URL of 
-
-the request, which can be of any type, including HTTP, FTP, news, or mailto.
-
-The target parameter represents the destination where the URL will be displayed, a window or 
-
-frame. If target refers to the window or frame containing the plug-in instance, it is destroyed 
-
-and the plug-in may be unloaded. If the target parameter is set to null, the application 
-
-creates a new stream and delivers the data to the plug-in instance, through calls to 
-
-NPP_NewStream , NPP_WriteReady  and NPP_Write , and NPP_DestroyStream .
+retrieve data in URL
 
 NPError NPN_PostURL(NPP instance, const char *url, const char *target, uint32 len, const char 
-
 *buf, NPBool file);
+send data to URL
+
+The target parameter represents the destination where the URL will be displayed, a window or 
+frame. If target refers to the window or frame containing the plug-in instance, it is destroyed 
+and the plug-in may be unloaded. If the target parameter is set to null, the application 
+creates a new stream and delivers the data to the plug-in instance, through calls to 
+NPP_NewStream , NPP_WriteReady  and NPP_Write , and NPP_DestroyStream .
+
 */
-// searched on Web and get these codes
 NPError nsPluginInstance::GetTest() {
-	/*
-	NPObject *object;
-	NPVariant value;
-	NPN_GetValue(this->mInstance,NPNVPluginElementNPObject, &object);
-	NPIdentifier identifier = NPN_GetStringIdentifier("ownerDocument");
-	NPN_GetProperty(this->mInstance, object, identifier, &value);
-	NPN_ReleaseObject(object);
-	object = NPVARIANT_TO_OBJECT(value);
-    identifier = NPN_GetStringIdentifier("URL");
-    NPN_GetProperty(this->mInstance, object, identifier, &value);
-    NPN_ReleaseObject(object);
-    string = NPVARIANT_TO_STRING(value);
-    url = Str(string.UTF8Characters, string.UTF8Length);
-	*/
 	if (!mSrc) 
 		return NPERR_INVALID_URL;
 	if (!mCode)
 		return NPERR_GENERIC_ERROR;
 	NPError err;
-	/*
-	char *buf = "654321";
-	int16_t len = strlen(buf);
-	err = NPN_PostURL(this->mInstance, this->mURL, "_blank", len+1, buf, FALSE);
-	*/
 	err = NPN_GetURL(this->mInstance, this->mURL, "_blank");
 	return err;
 }

@@ -59,7 +59,7 @@ private:
   NPBool m_bInitialized;
 
   NPObject *m_pScriptableObject;
-
+	NPObject *sWindowObj;
 public:
   char m_String[128];
 

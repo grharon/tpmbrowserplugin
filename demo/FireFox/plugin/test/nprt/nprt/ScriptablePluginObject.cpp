@@ -2,6 +2,7 @@
 #include "ConstructablePluginObject.h"
 #include "fix.h"
 #include "npapi.h"
+//#include "windows.h"
 
 bool
 ScriptablePluginObject::HasMethod(NPIdentifier name)
@@ -19,7 +20,7 @@ ScriptablePluginObject::HasProperty(NPIdentifier name)
 bool
 ScriptablePluginObject::GetProperty(NPIdentifier name, NPVariant *result)
 {
-  VOID_TO_NPVARIANT(*result);
+  VOID_TO_NPVARIANT(*result);// set result to void
 
   if (name == sBar_id) {
     static int a = 17;
@@ -56,14 +57,15 @@ argCount : number of arguments
 result : return value
 */
 {
-  if (name == sFoo_id) {
-    printf ("foo called!\n");
-	//MessageBox(NULL,"foo called!","ScriptablePlugin Sample",MB_OK);
-	
-    NPVariant docv;
-    NPN_GetProperty(mNpp, sWindowObj, sDocument_id, &docv);
+	NPObject* sWindowObj;
+  NPN_GetValue(mNpp, NPNVWindowNPObject, &sWindowObj);
+  NPVariant docv;
+	NPN_GetProperty(mNpp, sWindowObj, sDocument_id, &docv);
+	NPObject *doc = NPVARIANT_TO_OBJECT(docv);//window.document -> docv -> doc
 
-    NPObject *doc = NPVARIANT_TO_OBJECT(docv);//window.document -> docv -> doc
+	if (name == sFoo_id) {
+    printf ("foo called!\n");
+		//MessageBox(NULL,"foo called!","ScriptablePlugin Sample",MB_OK);
 
     NPVariant strv;
     STRINGZ_TO_NPVARIANT("div", strv);//"div" -> strv
@@ -94,18 +96,24 @@ result : return value
     NPN_ReleaseVariantValue(&bodyv);
 
     NPN_ReleaseVariantValue(&docv);
-	
-
     STRINGZ_TO_NPVARIANT(m_strdup("foo return val"), *result);// "foo return val" -> result
     return true;
   }
   if (name == sGetURL_id) {
+    printf("Calling GetURL()\n");
+    NPIdentifier n = NPN_GetStringIdentifier("rURL");
+	  NPVariant rval;
+
+	  NPN_GetProperty(mNpp, doc, n, &rval);
+		if (NPVARIANT_IS_STRING(rval)) {
+		  NPError err = NPN_GetURL(mNpp,NPVARIANT_TO_STRING(rval).UTF8Characters, "_self");
+      NPN_ReleaseVariantValue(&rval);
+    }
+		else {
+		  NPError err = NPN_GetURL(mNpp, "http://www.google.com.hk/","_self");
+		}
+    NPN_ReleaseVariantValue(&docv);
 	  /*
-	  typedef struct tagPARAMPAIR {
-		LPTSTR pName;
-		LPTSTR pValue;
-	  }PARAMPAIR,*PPARAMPAIR;
-	  vector<PARAMPAIR> m_vecParamPair;
 	  if ((args != NULL) && (argCount >= 2)) {
 		  NPVariant npvName = args[0];
 		  NPVariant npvValue = args[1];
@@ -115,19 +123,13 @@ result : return value
 			  if (npsName.UTF8Characters && strlen(npsName.UTF8Characters) > 0) {// restrict this one not to be ""
 				  int nLenName = strlen(npsName.UTF8Characters)+1;
 				  int nLenValue = strlen(npsValue.UTF8Characters)+1;
-				  PARAMPAIR paramPair;
-				  paramPair.pName = new char[nLenName];
-				  memset(paramPair.pName,0,nLenName);
-				  paramPair.pValue = new char[nLenValue];
-				  memset(paramPair.pValue,0,nLenValue);
-				  strcpy(paramPair.pName,npsName.UTF8Characters);
-				  strcpy(paramPair.pValue,npsValue.UTF8Characters);
-				  m_vecParamPair.push_back(paramPair);
+				  ...
 			  }
 		  }
 	  }
 	  */
-	return true;
+    STRINGZ_TO_NPVARIANT(m_strdup("ok"), *result);
+		return true;
   }
   return false;
 }
