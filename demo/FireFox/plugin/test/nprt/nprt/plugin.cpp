@@ -58,18 +58,6 @@
 #include "npfunctions.h"
 
 #include "ScriptablePluginObject.h"
-NPIdentifier sFoo_id;
-NPIdentifier sBar_id;
-NPIdentifier sPluginType_id;
-NPIdentifier sCreateElement_id;
-NPIdentifier sCreateTextNode_id;
-NPIdentifier sDocument_id;
-NPIdentifier sAppendChild_id;
-NPIdentifier sBody_id;
-// modified to transfer data, and call functions
-NPIdentifier sCode_id;
-NPIdentifier sURL_id;
-NPIdentifier sGetURL_id;
 
 CPlugin::CPlugin(NPP pNPInstance, char *aCode, char* aURL) :
   m_pNPInstance(pNPInstance),
@@ -87,25 +75,26 @@ CPlugin::CPlugin(NPP pNPInstance, char *aCode, char* aURL) :
   // initialize id
   NPIdentifier n = NPN_GetStringIdentifier("foof");
 
-  sFoo_id = NPN_GetStringIdentifier("foo");
-  sBar_id = NPN_GetStringIdentifier("bar");
-  sDocument_id = NPN_GetStringIdentifier("document");
-  sBody_id = NPN_GetStringIdentifier("body");
-  sCreateElement_id = NPN_GetStringIdentifier("createElement");
-  sCreateTextNode_id = NPN_GetStringIdentifier("createTextNode");
-  sAppendChild_id = NPN_GetStringIdentifier("appendChild");
-  sPluginType_id = NPN_GetStringIdentifier("PluginType");
+  NPIdentifier sFoo_id = NPN_GetStringIdentifier("foo");
+  NPIdentifier sBar_id = NPN_GetStringIdentifier("bar");
+  NPIdentifier sPluginType_id = NPN_GetStringIdentifier("PluginType");
+  NPIdentifier sGetURL_id = NPN_GetStringIdentifier("GetURL");
+
+	NPIdentifier sDocument_id = NPN_GetStringIdentifier("document");
+  NPIdentifier sBody_id = NPN_GetStringIdentifier("body");
+  NPIdentifier sCreateElement_id = NPN_GetStringIdentifier("createElement");
+  NPIdentifier sCreateTextNode_id = NPN_GetStringIdentifier("createTextNode");
+  NPIdentifier sAppendChild_id = NPN_GetStringIdentifier("appendChild");
   
-  sGetURL_id = NPN_GetStringIdentifier("GetURL");
-  sCode_id = NPN_GetStringIdentifier("code");
-  sURL_id = NPN_GetStringIdentifier("rURL");
+  NPIdentifier sCode_id = NPN_GetStringIdentifier("code");
+  NPIdentifier sURL_id = NPN_GetStringIdentifier("rURL");
 
   /* set "this" into addr */
   NPVariant v;
 
   INT32_TO_NPVARIANT(46, v);
 
-  NPN_SetProperty(m_pNPInstance, sWindowObj, n, &v);
+  NPN_SetProperty(m_pNPInstance, sWindowObj, n, &v);//window->foof = 46
 
   NPVariant rval;
   NPN_GetProperty(m_pNPInstance, sWindowObj, n, &rval);
@@ -179,17 +168,6 @@ CPlugin::CPlugin(NPP pNPInstance, char *aCode, char* aURL) :
 
   NPVariant barval;
   NPN_GetProperty(m_pNPInstance, sWindowObj, sBar_id, &barval);
-/*
-window
-->foof
-->code
-->rURL
-->bar
-->plugindoc
-->document
---->title
---->URL
-*/
 
   NPVariant arg;
   OBJECT_TO_NPVARIANT(sWindowObj, arg);
@@ -205,7 +183,6 @@ window
 
   NPN_ReleaseVariantValue(&barval);
   NPN_ReleaseVariantValue(&rval);
-
 
 #if 0
   n = NPN_GetStringIdentifier("prompt");

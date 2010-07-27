@@ -2,17 +2,20 @@
 #include "ConstructablePluginObject.h"
 #include "fix.h"
 #include "npapi.h"
-//#include "windows.h"
 
 bool
 ScriptablePluginObject::HasMethod(NPIdentifier name)
 {
-  return ((name == sFoo_id) || (name = sGetURL_id));
+	NPIdentifier sFoo_id = NPN_GetStringIdentifier("foo");
+	NPIdentifier sGetURL_id = NPN_GetStringIdentifier("GetURL");
+  return ((name == sFoo_id) || (name == sGetURL_id));
 }
 
 bool
 ScriptablePluginObject::HasProperty(NPIdentifier name)
 {
+	NPIdentifier sBar_id = NPN_GetStringIdentifier("bar");
+	NPIdentifier sPluginType_id = NPN_GetStringIdentifier("PluginType");
   return ((name == sBar_id) ||
           (name == sPluginType_id));
 }
@@ -20,15 +23,15 @@ ScriptablePluginObject::HasProperty(NPIdentifier name)
 bool
 ScriptablePluginObject::GetProperty(NPIdentifier name, NPVariant *result)
 {
-  VOID_TO_NPVARIANT(*result);// set result to void
+	VOID_TO_NPVARIANT(*result);// set result to void
 
+	NPIdentifier sBar_id = NPN_GetStringIdentifier("bar");
+	NPIdentifier sPluginType_id = NPN_GetStringIdentifier("PluginType");
+
+	//printf("bar_id = %d\n",sBar_id);
   if (name == sBar_id) {
-    static int a = 17;
-
     INT32_TO_NPVARIANT(a, *result);
-
     a += 5;
-
     return true;
   }
 
@@ -40,7 +43,6 @@ ScriptablePluginObject::GetProperty(NPIdentifier name, NPVariant *result)
     }
 
     OBJECT_TO_NPVARIANT(myobj, *result);
-
     return true;
   }
 
@@ -57,12 +59,21 @@ argCount : number of arguments
 result : return value
 */
 {
+	if (!this->HasMethod(name))
+		return false;
+	NPIdentifier sFoo_id = NPN_GetStringIdentifier("foo");
+	NPIdentifier sGetURL_id = NPN_GetStringIdentifier("GetURL");
 	NPObject* sWindowObj;
   NPN_GetValue(mNpp, NPNVWindowNPObject, &sWindowObj);
   NPVariant docv;
+	NPIdentifier sDocument_id = NPN_GetStringIdentifier("document");
+  NPIdentifier sBody_id = NPN_GetStringIdentifier("body");
+  NPIdentifier sCreateElement_id = NPN_GetStringIdentifier("createElement");
+  NPIdentifier sCreateTextNode_id = NPN_GetStringIdentifier("createTextNode");
+  NPIdentifier sAppendChild_id = NPN_GetStringIdentifier("appendChild");
+
 	NPN_GetProperty(mNpp, sWindowObj, sDocument_id, &docv);
 	NPObject *doc = NPVARIANT_TO_OBJECT(docv);//window.document -> docv -> doc
-
 	if (name == sFoo_id) {
     printf ("foo called!\n");
 		//MessageBox(NULL,"foo called!","ScriptablePlugin Sample",MB_OK);
@@ -95,12 +106,10 @@ result : return value
     NPN_ReleaseVariantValue(&divv);
     NPN_ReleaseVariantValue(&bodyv);
 
-    NPN_ReleaseVariantValue(&docv);
     STRINGZ_TO_NPVARIANT(m_strdup("foo return val"), *result);// "foo return val" -> result
-    return true;
   }
   if (name == sGetURL_id) {
-    printf("Calling GetURL()\n");
+    printf("GetURL() called\n");
     NPIdentifier n = NPN_GetStringIdentifier("rURL");
 	  NPVariant rval;
 
@@ -112,7 +121,6 @@ result : return value
 		else {
 		  NPError err = NPN_GetURL(mNpp, "http://www.google.com.hk/","_self");
 		}
-    NPN_ReleaseVariantValue(&docv);
 	  /*
 	  if ((args != NULL) && (argCount >= 2)) {
 		  NPVariant npvName = args[0];
@@ -129,9 +137,10 @@ result : return value
 	  }
 	  */
     STRINGZ_TO_NPVARIANT(m_strdup("ok"), *result);
-		return true;
   }
-  return false;
+  NPN_ReleaseVariantValue(&docv);
+	NPN_ReleaseObject(sWindowObj);
+  return true;
 }
 
 bool
@@ -149,9 +158,10 @@ bool
 ScriptablePluginObject::SetProperty(NPIdentifier name,
                                         const NPVariant *value)
 {
+	NPIdentifier sBar_id = NPN_GetStringIdentifier("bar");
   if (name == sBar_id) {
     printf ("bar set\n");
-
+		a = 17;
     return true;
   }
   return false;
