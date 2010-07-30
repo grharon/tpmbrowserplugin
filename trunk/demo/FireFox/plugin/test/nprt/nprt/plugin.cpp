@@ -71,6 +71,7 @@ CPlugin::CPlugin(NPP pNPInstance, char *aCode, char* aURL) :
   m_hWnd = NULL;
 #endif
   NPN_GetValue(m_pNPInstance, NPNVWindowNPObject, &sWindowObj);
+	NPN_GetValue(m_pNPInstance, NPNVPluginElementNPObject, &sPluginElementObj);
 
   // initialize id
   NPIdentifier n = NPN_GetStringIdentifier("foof");
@@ -144,11 +145,11 @@ CPlugin::CPlugin(NPP pNPInstance, char *aCode, char* aURL) :
 
     if (this->mCode) {
 		  STRINGZ_TO_NPVARIANT(mCode,v);
-		  NPN_SetProperty(m_pNPInstance, doc, sCode_id, &v);
+		  NPN_SetProperty(m_pNPInstance, sPluginElementObj, sCode_id, &v);
 		}
 		if (this->mURL) {
 			STRINGZ_TO_NPVARIANT(mURL,v);
-			NPN_SetProperty(m_pNPInstance, doc, sURL_id, &v);
+			NPN_SetProperty(m_pNPInstance, sPluginElementObj, sURL_id, &v);
 		}
 
     // end of my script
@@ -230,10 +231,10 @@ CPlugin::~CPlugin()
 {
   if (sWindowObj)
     NPN_ReleaseObject(sWindowObj);
+	if (sPluginElementObj)
+		NPN_ReleaseObject(sPluginElementObj);
   if (m_pScriptableObject)
     NPN_ReleaseObject(m_pScriptableObject);
-
-  sWindowObj = 0;
 }
 
 #ifdef XP_WIN

@@ -28,7 +28,6 @@ ScriptablePluginObject::GetProperty(NPIdentifier name, NPVariant *result)
 	NPIdentifier sBar_id = NPN_GetStringIdentifier("bar");
 	NPIdentifier sPluginType_id = NPN_GetStringIdentifier("PluginType");
 
-	//printf("bar_id = %d\n",sBar_id);
   if (name == sBar_id) {
     INT32_TO_NPVARIANT(a, *result);
     a += 5;
@@ -64,7 +63,9 @@ result : return value
 	NPIdentifier sFoo_id = NPN_GetStringIdentifier("foo");
 	NPIdentifier sGetURL_id = NPN_GetStringIdentifier("GetURL");
 	NPObject* sWindowObj;
+	NPObject* sPluginElementObj;
   NPN_GetValue(mNpp, NPNVWindowNPObject, &sWindowObj);
+  NPN_GetValue(mNpp, NPNVPluginElementNPObject, &sPluginElementObj);
   NPVariant docv;
 	NPIdentifier sDocument_id = NPN_GetStringIdentifier("document");
   NPIdentifier sBody_id = NPN_GetStringIdentifier("body");
@@ -113,7 +114,7 @@ result : return value
     NPIdentifier n = NPN_GetStringIdentifier("rURL");
 	  NPVariant rval;
 
-	  NPN_GetProperty(mNpp, doc, n, &rval);
+	  NPN_GetProperty(mNpp, sPluginElementObj, n, &rval);
 		if (NPVARIANT_IS_STRING(rval)) {
 		  NPError err = NPN_GetURL(mNpp,NPVARIANT_TO_STRING(rval).UTF8Characters, "_self");
       NPN_ReleaseVariantValue(&rval);
@@ -139,7 +140,10 @@ result : return value
     STRINGZ_TO_NPVARIANT(m_strdup("ok"), *result);
   }
   NPN_ReleaseVariantValue(&docv);
-	NPN_ReleaseObject(sWindowObj);
+	if (sWindowObj)
+		NPN_ReleaseObject(sWindowObj);
+	if (sPluginElementObj)
+		NPN_ReleaseObject(sPluginElementObj);
   return true;
 }
 

@@ -60,6 +60,7 @@ private:
 
   NPObject *m_pScriptableObject;
 	NPObject *sWindowObj;
+	NPObject *sPluginElementObj;
 public:
   char m_String[128];
 
