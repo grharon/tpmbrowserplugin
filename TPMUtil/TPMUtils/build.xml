@@ -1,0 +1,54 @@
+<project>
+	<property environment="env"/>
+    <property name="userhome" value="${env.USERPROFILE}"/>
+    <property name="src" value="src"/>
+    <property name="bin" value="bin"/>
+    <property name="lib" value="lib"/>
+    <property name="jarfile" value="tpmutils.jar"/>
+    <property name="jarfilepath" value="${userhome}/${jarfile}"/>
+    <path id="deplib">
+        <fileset dir="${lib}">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+
+    <target name="build">
+        <mkdir dir="${bin}"/>
+        <javac srcdir="${src}" destdir="${bin}">
+            <classpath refid="deplib"/>
+        </javac>
+    </target>
+
+    <target name="jar" depends="build">
+        <unzip src="${lib}/bcprov-jdk15-131.jar" dest="${bin}"/>
+        <unzip src="${lib}/tpmj.jar" dest="${bin}"/>
+        <delete dir="${bin}/META-INF"/>
+        <jar destfile="${jarfilepath}">
+            <fileset dir="${bin}"/>
+            <manifest>
+                <attribute name="Main-Class" value="com.intel.splat.identityservice.tpm.TPMInitKey"/>
+            </manifest>
+        </jar>
+        <copy file="${lib}/IFXTPMJNIProxy.dll" todir="${userhome}"/>
+        <copy file="${lib}/TBSProxy.dll" todir="${userhome}"/>
+        <copy file="${lib}/TBSProxy64.dll" todir="${userhome}"/>
+        <copy file="${lib}/bcprov-jdk15-131.jar" todir="${userhome}"/>
+    </target>
+
+	<!-- only support tpm key generation on windows since tpm library depends on a dll -->
+    <target name="gentpmkey" depends="jar">
+        <echo message="args: ${os} ${keyPass}"/>
+        <java jar="${jarfilepath}" fork="true">
+            <arg value="${os}"/>
+            <arg value="${keyPass}"/>
+            <jvmarg value="-Djava.library.path=${userhome}"/>
+            <classpath>
+                <pathelement location="${jarfilepath}"/>
+            </classpath>
+        </java>
+    </target>
+
+    <target name="clean">
+        <delete dir="${bin}"/>
+    </target>
+</project>
