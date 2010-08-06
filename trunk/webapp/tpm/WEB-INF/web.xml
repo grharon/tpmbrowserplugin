@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<web-app>
+	<context-param>
+		<!-- specify the relative directory of WEB-INF -->
+		<param-name>WEB_INF_DIR</param-name>
+		<param-value></param-value>
+	</context-param>
+
+	<security-role>
+		<role-name>IntelCBROpsAdmin</role-name>
+	</security-role>
+
+	<security-role>
+		<role-name>IntelCBRSecAdmin</role-name>
+	</security-role>
+
+	<security-role>
+		<role-name>IntelCBRCfgAdmin</role-name>
+	</security-role>
+
+	<session-config>
+		<session-timeout>30</session-timeout>
+	</session-config>
+
+
+	<!-- Default page to serve -->
+	<welcome-file-list>
+		<welcome-file>splat.html</welcome-file>
+	</welcome-file-list>
+
+	<session-config>
+		<session-timeout>
+			30
+    </session-timeout>
+	</session-config>
+</web-app>

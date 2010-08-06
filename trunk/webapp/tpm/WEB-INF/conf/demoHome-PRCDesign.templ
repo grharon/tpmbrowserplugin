@@ -1,0 +1,42 @@
+<!-- saved from url=(0014)about:internet -->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Intel SSO Demo</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style type="text/css">
+body{background:#FFF URL(@SPLASHIDPSERVER@/authn/img/bg.png) no-repeat center top;padding:0;margin:0;}
+td img {display: block;}
+ul{margin:0 auto;width:1000px;height:500px;padding:0}
+li{list-style:none;margin:0;padding:0}
+li{float:left;}
+li a{width:200px;height:500px;display:block;}
+a img{border-width:0;}
+#img1{background-image:URL(@SPLASHIDPSERVER@/authn/img/1.png)}
+#img1:hover{background-image:URL(@SPLASHIDPSERVER@/authn/img/11.png)}
+#img2{background-image:URL(@SPLASHIDPSERVER@/authn/img/2.png)}
+#img2:hover{background-image:URL(@SPLASHIDPSERVER@/authn/img/21.png)}
+#img3{background-image:URL(@SPLASHIDPSERVER@/authn/img/3.png)}
+#img3:hover{background-image:URL(@SPLASHIDPSERVER@/authn/img/31.png)}
+#img4{background-image:URL(@SPLASHIDPSERVER@/authn/img/4.png)}
+#img4:hover{background-image:URL(@SPLASHIDPSERVER@/authn/img/41.png)}
+#img5{background-image:URL(@SPLASHIDPSERVER@/authn/img/5.png)}
+#img5:hover{background-image:URL(@SPLASHIDPSERVER@/authn/img/51.png)}
+#header{text-align:right;margin:0 auto;height:100px;width:1000px;font-size:12px;line-height:30px;}
+form{margin:0 auto;width:800px;margin-top:200px;}
+input{border:2px solid #3D579B;padding:5px;background-color:#FFF;line-height:25px;width:280px;margin-right:20px;}
+button{border:2px solid #3D579B;padding:3px;background-color:#FFF;line-height:25px;background-color:#6882C4;width:100px;font-size:15px;font-weight:bold;color:#FFF;}
+</style>
+</head>
+<body bgcolor="#ffffff">
+<div style="font-size:120%;font-family:verdana;color:Blue" id="header">
+	@SPLASHUSER@ <a href="@SESSION_PAGE@">@SESSION_STATE@</a>
+</div>
+<ul style="">
+	<li><a href="http://mail.google.com/a/@GOOGLEAPPSDOMAIN@" target="_blank" id="img1"></a></li>
+	<li><a href="http://calendar.google.com/a/@GOOGLEAPPSDOMAIN@" target="_blank" id="img2"></a></li>
+	<li><a href="@SALESFORCEIDPINITSSO@" target="_blank" id="img3"></a></li>
+	<li><a href="@MYEXPENSEADDR@" target="_blank" id="img4"></a></li>
+	<li><a href="@ESSADDR@" target="_blank" id="img5"></a></li>
+</ul>
+</body>
+</html>
