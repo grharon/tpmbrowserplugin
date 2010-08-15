@@ -67,53 +67,34 @@ CPlugin::CPlugin(NPP pNPInstance, int16_t argc, char* argn[], char* argv[]):
 #ifdef XP_WIN
   m_hWnd = NULL;
 #endif
-	NPError err;
-	NPObject* sWindowObj;
-	NPObject* sPluginElementObj;
-  err = NPN_GetValue(m_pNPInstance, NPNVWindowNPObject, &sWindowObj);
-	err = NPN_GetValue(m_pNPInstance, NPNVPluginElementNPObject, &sPluginElementObj);
-
-  // initialize id
-  
-  NPIdentifier sURL_id = NPN_GetStringIdentifier("rURL");
-	NPVariant v;
-	
-	mURL = NULL;
-  for (int16_t i = 0;i < argc;i++) {
-	  if (!strcmp(argn[i],"src")) {
-		  mURL = argv[i];
-	  }
-  }
-	printf("mURL = %s\n",mURL);
-	if (mURL)
-		STRINGZ_TO_NPVARIANT(this->mURL,v);
-	else
-		VOID_TO_NPVARIANT(v);
-	bool ret;
-	ret = NPN_SetProperty(m_pNPInstance, sPluginElementObj, sURL_id, &v);
-	//ret = NPN_SetProperty(m_pNPInstance, sWindowObj, sURL_id, &v);
-	printf("sPluginElementObj = %x\n", sPluginElementObj);
-	printf("setproperty = %d\n",ret);
-
-  const char *ua = NPN_UserAgent(m_pNPInstance);
+	const char *ua = NPN_UserAgent(m_pNPInstance);
   strcpy(m_String, ua);
 
-	NPN_ReleaseObject(sWindowObj);
-	NPN_ReleaseObject(sPluginElementObj);
+  // initialize id
+  NPIdentifier rURL_id = NPN_GetStringIdentifier("rURL");
+
+	NPVariant v;
+	bool ret;
+
+	VOID_TO_NPVARIANT(v);
+  for (int16_t i = 0;i < argc;i++) {
+	  if (!strcmp(argn[i],"src")) {
+			printf("mURL = %s\n",argv[i]);
+			STRINGZ_TO_NPVARIANT(m_strdup(argv[i]),v);
+			break;
+	  }
+  }
+
+	NPObject *myobj = this->GetScriptableObject();
+	ret = NPN_SetProperty(m_pNPInstance, myobj, rURL_id, &v);
+	printf("ret = %d\n",ret);
+  NPN_ReleaseObject(myobj);
 }
 
 CPlugin::~CPlugin()
 {
-	/*
-  NPIdentifier sURL_id = NPN_GetStringIdentifier("rURL");
-	NPObject* sPluginElementObj;
-	NPN_GetValue(m_pNPInstance, NPNVPluginElementNPObject, &sPluginElementObj);
-	NPN_RemoveProperty(m_pNPInstance, sPluginElementObj, sURL_id);
-	NPN_ReleaseObject(sPluginElementObj);
-	*/
 	if (m_pScriptableObject) {
     NPN_ReleaseObject(m_pScriptableObject);
-		//m_pScriptableObject = NULL;
 	}
 }
 
@@ -225,9 +206,7 @@ NPObject *
 CPlugin::GetScriptableObject()
 {
   if (!m_pScriptableObject) {
-    m_pScriptableObject =
-      NPN_CreateObject(m_pNPInstance,
-                       GET_NPOBJECT_CLASS(ScriptablePluginObject));
+    m_pScriptableObject = NPN_CreateObject(m_pNPInstance, GET_NPOBJECT_CLASS(ScriptablePluginObject));
   }
 
   if (m_pScriptableObject) {

@@ -8,5 +8,5 @@ jar cvfM ..\nprt.xpi -C ./ *.*
 cd ..
 
 rmdir /q /s xpi
-echo "Open nprt.xpi with firefox. The plugin will be installed into :"
-echo "<home>\Application Data\Mozilla\Firefox\Profiles\<profile_name>\extensions\"
+echo "open nprt.xpi with firefox and plugin will be installed into :"
+echo "<disk>:\Documents and Settings\<user_name>\Application Data\Mozilla\Firefox\Profiles\<profile_name>\extensions\"

@@ -14,13 +14,14 @@ public:
 		this->keyword = (char*) NPN_MemAlloc(len+1);
 		strncpy(this->keyword, ch, len);
 		this->keyword[len]='\0';
+		this->rURL = NULL;
   }
 
 	virtual ~ScriptablePluginObject() {
-		if (this->keyword) {
+		if (keyword)
 			NPN_MemFree(keyword);
-			this->keyword = NULL;
-		}
+		if (rURL) 
+			NPN_MemFree(rURL);
 	}
   virtual bool HasMethod(NPIdentifier name);
   virtual bool HasProperty(NPIdentifier name);
@@ -32,6 +33,7 @@ public:
   virtual bool SetProperty(NPIdentifier name, const NPVariant *value);
 private:
 	char* keyword;
+	char* rURL;
 };
 
 static NPObject *
