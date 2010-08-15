@@ -2,6 +2,7 @@
 #include "ConstructablePluginObject.h"
 #include "fix.h"
 #include "npapi.h"
+#include "jni.h"
 
 bool
 ScriptablePluginObject::HasMethod(NPIdentifier name)
@@ -20,18 +21,26 @@ ScriptablePluginObject::HasProperty(NPIdentifier name)
 {
 	// method for Keyword value
 	NPIdentifier keyword_id = NPN_GetStringIdentifier("keyword");
-  return (name == keyword_id);
+	NPIdentifier rURL_id = NPN_GetStringIdentifier("rURL");
+  return ((name == keyword_id) || (name == rURL_id));
 }
 
 bool
 ScriptablePluginObject::GetProperty(NPIdentifier name, NPVariant *result)
 {
 	VOID_TO_NPVARIANT(*result);// set result to void
+	if (!HasProperty(name)) {
+		return false;
+	}
 	NPIdentifier keyword_id = NPN_GetStringIdentifier("keyword");
+	NPIdentifier rURL_id = NPN_GetStringIdentifier("rURL");
   if (name == keyword_id) {
-		STRINGZ_TO_NPVARIANT(m_strdup(this->keyword), *result);
+		STRINGZ_TO_NPVARIANT(m_strdup(this->keyword), *result);// add reference here
   }
-  return true;
+	else if (name == rURL_id) {
+		STRINGZ_TO_NPVARIANT(m_strdup(this->rURL), *result);// add reference here
+	}
+	return true;
 }
 
 bool
@@ -53,13 +62,7 @@ result : return value
 	NPIdentifier doSignature_id = NPN_GetStringIdentifier("doSignature");
 	NPIdentifier getPublicKeyContent_id = NPN_GetStringIdentifier("getPublicKeyContent");
 
-	NPObject* sPluginElementObj;
 	NPObject* sWindowNPObj;
-
-	if ((err = NPN_GetValue(mNpp, NPNVPluginElementNPObject, &sPluginElementObj)) != NPERR_NO_ERROR) {
-		printf("Error in getting NPNVPluginElementNPObject: %d\n",err);
-		return false;
-	}
 
 	if ((err = NPN_GetValue(mNpp, NPNVWindowNPObject, &sWindowNPObj)) != NPERR_NO_ERROR) {
 		printf("Error in getting NPNVWindowNPObject: %d\n",err);
@@ -69,21 +72,15 @@ result : return value
 	// GetURL code
   if (name == GetURL_id) {
     printf("GetURL() called\n");
-    NPIdentifier n = NPN_GetStringIdentifier("rURL");
-	  NPVariant rval;
-
-	  NPN_GetProperty(mNpp, sPluginElementObj, n, &rval);
-		if (NPVARIANT_IS_STRING(rval)) {
-			if (NPN_GetURL(mNpp,NPVARIANT_TO_STRING(rval).UTF8Characters, "_self") != NPERR_NO_ERROR) {
+		if (rURL) {
+			if (NPN_GetURL(mNpp, rURL, "_self") != NPERR_NO_ERROR) {
 				printf("error on converting GetURL\n");
 			}
-		}
-		else {
+		} else {
 			if (NPN_GetURL(mNpp, "http://www.google.com.hk/","_self") != NPERR_NO_ERROR) {
 				printf("error on converting GetURL\n");
 			}
 		}
-    NPN_ReleaseVariantValue(&rval);
     STRINGZ_TO_NPVARIANT(m_strdup("ok"), *result);
   }
 	else if (name == doSignature_id) {
@@ -109,7 +106,6 @@ result : return value
 		}
 		else VOID_TO_NPVARIANT(*result);// set result to void, cause an error?
 	}
-	NPN_ReleaseObject(sPluginElementObj);
 	NPN_ReleaseObject(sWindowNPObj);
   return true;
 }
@@ -129,19 +125,20 @@ bool
 ScriptablePluginObject::SetProperty(NPIdentifier name,
                                         const NPVariant *value)
 {
-	NPIdentifier sKeyword_id = NPN_GetStringIdentifier("keyword");
-  if (name == sKeyword_id) {
-    printf ("keyword set\n");
-		if NPVARIANT_IS_STRING(*value) {			
-			NPString nkw = NPVARIANT_TO_STRING(*value);
-			int len = nkw.UTF8Length;
-			if (this->keyword)
-				NPN_MemFree(this->keyword);
-			this->keyword = (char*) NPN_MemAlloc(len+1);
-			strncpy(this->keyword,nkw.UTF8Characters,len);
-			this->keyword[len] = '\0';
-		}
-    return true;
-  }
+	NPIdentifier keyword_id = NPN_GetStringIdentifier("keyword");
+	NPIdentifier rURL_id = NPN_GetStringIdentifier("rURL");
+  if (name == keyword_id) {
+		printf("call SetProperty::keyword\n");
+		m_strFromVar(&keyword,*value);
+		// Release value?
+		NPN_ReleaseVariantValue((NPVariant*)value);
+		return true;
+	} else if (name == rURL_id) {
+		printf("call SetProperty::rURL\n");
+		m_strFromVar(&rURL,*value);
+		// Release value?
+		NPN_ReleaseVariantValue((NPVariant*)value);
+		return true;
+	}
   return false;
 }

@@ -46,7 +46,6 @@ class CPlugin
 {
 private:
   NPP m_pNPInstance;
-  char* mURL;
 
 #ifdef XP_WIN
   HWND m_hWnd; 
