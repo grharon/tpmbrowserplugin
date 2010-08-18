@@ -1,0 +1,1 @@
+将公钥和私钥保存在D:\TPM emluator下，运行TPMSignApplet即可得到签名结果。
