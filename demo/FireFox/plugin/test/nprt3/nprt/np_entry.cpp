@@ -175,13 +175,14 @@ NP_Initialize(NPNetscapeFuncs* pFuncs
   pluginFuncs->getvalue   = (NPP_GetValueProcPtr)(NPP_GetValue);
   pluginFuncs->javaClass  = NULL;
 
-  NPP_Initialize();
 #endif
+  NPP_Initialize();
 
   return NPERR_NO_ERROR;
 }
 
 NPError OSCALL NP_Shutdown()
 {
+	NPP_Shutdown();
   return NPERR_NO_ERROR;
 }

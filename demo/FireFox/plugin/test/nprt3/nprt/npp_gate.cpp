@@ -41,22 +41,27 @@
 // most are just empty stubs for this particular plugin 
 //
 #include "plugin.h"
+#include "jnitest.h"
 
 char*
 NPP_GetMIMEDescription(void)
 {
-  return "application/mozilla-npruntime-scriptable-plugin:.rts:Scriptability Demo Plugin";
+  return "application/mozilla-npruntime-scriptable-plugin:.:Scriptability Demo Plugin";
 }
 
 
 
 NPError NPP_Initialize(void)
 {
-  return NPERR_NO_ERROR;
+	if (loadJVM())
+		return NPERR_GENERIC_ERROR;
+	else 
+		return NPERR_NO_ERROR;
 }
 
 void NPP_Shutdown(void)
 {
+	unloadJVM();
 }
 
 // here the plugin creates an instance of our CPlugin object which 
