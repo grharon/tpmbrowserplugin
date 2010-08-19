@@ -1,3 +1,4 @@
+/* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
 #include "ScriptablePluginObject.h"
 #include "ConstructablePluginObject.h"
 #include "fix.h"
@@ -24,7 +25,10 @@ ScriptablePluginObject::HasProperty(NPIdentifier name)
 	// method for Keyword value
 	NPIdentifier keyword_id = NPN_GetStringIdentifier("keyword");
 	NPIdentifier rURL_id = NPN_GetStringIdentifier("rURL");
-  return ((name == keyword_id) || (name == rURL_id));
+	NPIdentifier code_id = NPN_GetStringIdentifier("code");
+  return ((name == keyword_id) || 
+		(name == rURL_id) ||
+		(name == code_id));
 }
 
 bool
@@ -36,11 +40,18 @@ ScriptablePluginObject::GetProperty(NPIdentifier name, NPVariant *result)
 	}
 	NPIdentifier keyword_id = NPN_GetStringIdentifier("keyword");
 	NPIdentifier rURL_id = NPN_GetStringIdentifier("rURL");
+	NPIdentifier code_id = NPN_GetStringIdentifier("code");
   if (name == keyword_id) {
-		STRINGZ_TO_NPVARIANT(m_strdup(this->keyword), *result);// add reference here
+		if (keyword)
+			STRINGZ_TO_NPVARIANT(m_strdup(keyword), *result);// add reference here
   }
 	else if (name == rURL_id) {
-		STRINGZ_TO_NPVARIANT(m_strdup(this->rURL), *result);// add reference here
+		if (rURL)
+			STRINGZ_TO_NPVARIANT(m_strdup(rURL), *result);// add reference here
+	}
+	else if (name == code_id) {
+		if (code)
+			STRINGZ_TO_NPVARIANT(m_strdup(code), *result);// add reference here
 	}
 	return true;
 }
@@ -131,21 +142,25 @@ bool
 ScriptablePluginObject::SetProperty(NPIdentifier name,
                                         const NPVariant *value)
 {
+	if (!HasProperty(name)) {
+		return false;
+	}
 	NPIdentifier keyword_id = NPN_GetStringIdentifier("keyword");
 	NPIdentifier rURL_id = NPN_GetStringIdentifier("rURL");
+	NPIdentifier code_id = NPN_GetStringIdentifier("code");
+
   if (name == keyword_id) {
 		printf("call SetProperty::keyword\n");
 		m_strFromVar(&keyword,*value);
-		// Release value?
-		NPN_ReleaseVariantValue((NPVariant*)value);
-		return true;
 	} else if (name == rURL_id) {
 		printf("call SetProperty::rURL\n");
 		m_strFromVar(&rURL,*value);
-		// Release value?
-		NPN_ReleaseVariantValue((NPVariant*)value);
-		return true;
+	} else if (name == code_id) {
+		printf("call SetProperty::code\n");
+		m_strFromVar(&code,*value);
 	}
-  return false;
+	// Release value?
+	NPN_ReleaseVariantValue((NPVariant*)value);
+	return true;
 }
 

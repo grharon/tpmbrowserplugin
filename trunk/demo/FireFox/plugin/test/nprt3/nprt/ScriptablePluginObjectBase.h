@@ -1,9 +1,11 @@
+/* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
 #ifndef SCRIPTABLEPLUGINOBJECTBASE_H
 #define SCRIPTABLEPLUGINOBJECTBASE_H
-// === moved from plugin.cpp ===
-// Helper class that can be used to map calls to the NPObject hooks
-// into virtual methods on instances of classes that derive from this
-// class.
+/*
+CODE FROM "plugin.cpp"
+Helper class that can be used to map calls to the NPObject hooks into 
+virtual methods on instances of classes that derive from this class.
+*/
 
 #include "npapi.h"
 #include "npruntime.h"

@@ -1,3 +1,4 @@
+/* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
 #include "ScriptablePluginObjectBase.h"
 
 #ifndef SCRIPTABLEPLUGINOBJECT_H
@@ -14,7 +15,8 @@ public:
 		this->keyword = (char*) NPN_MemAlloc(len+1);
 		strncpy(this->keyword, ch, len);
 		this->keyword[len]='\0';
-		this->rURL = NULL;
+		rURL = NULL;
+		code = NULL;
   }
 
 	virtual ~ScriptablePluginObject() {
@@ -22,6 +24,8 @@ public:
 			NPN_MemFree(keyword);
 		if (rURL) 
 			NPN_MemFree(rURL);
+		if (code)
+			NPN_MemFree(code);
 	}
   virtual bool HasMethod(NPIdentifier name);
   virtual bool HasProperty(NPIdentifier name);
@@ -34,6 +38,7 @@ public:
 private:
 	char* keyword;
 	char* rURL;
+	char* code;
 };
 
 static NPObject *

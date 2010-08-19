@@ -22,8 +22,8 @@ window.
 
 <center>
 
-<embed id="embed1" type="application/mozilla-npruntime-scriptable-plugin" width="600" height="45" src="http://www.baidu.com"><br>
-<embed id="embed2" type="application/mozilla-npruntime-scriptable-plugin" hidden="true" src="http://code.google.com"><br>
+<embed id="embed1" type="application/mozilla-npruntime-scriptable-plugin" width="600" height="45" src="http://www.baidu.com" code="123465"><br>
+<embed id="embed2" type="application/mozilla-npruntime-scriptable-plugin" hidden="true" src="http://code.google.com" code="364237"><br>
 
 <br>
 <form name="formname">
@@ -37,6 +37,7 @@ window.
 <input type=button value="alert(embed2.keyword)" onclick="alert(document.getElementById('embed2').keyword);">
 <input type=button value="embed2.keyword='bar'" onclick="document.getElementById('embed2').keyword='bar';">
 <input type=button value="embed2.keyword='5'" onclick="document.getElementById('embed2').keyword='5';">
+<input type=button value="alert(embed2.code)" onclick="alert(document.getElementById('embed2').code);">
 </form>
 
 </center>
