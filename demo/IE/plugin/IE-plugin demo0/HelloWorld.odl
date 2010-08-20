@@ -1,0 +1,70 @@
+// HelloWorld.odl : type library source for ActiveX Control project.
+
+// This file will be processed by the Make Type Library (mktyplib) tool to
+// produce the type library (HelloWorld.tlb) that will become a resource in
+// HelloWorld.ocx.
+
+#include <olectl.h>
+#include <idispids.h>
+
+[ uuid(5368F7EB-7183-415F-B8E6-AFA318630BE5), version(1.0),
+  helpfile("HelloWorld.hlp"),
+  helpstring("HelloWorld ActiveX Control module"),
+  control ]
+library HELLOWORLDLib
+{
+	importlib(STDOLE_TLB);
+	importlib(STDTYPE_TLB);
+
+	//  Primary dispatch interface for CHelloWorldCtrl
+
+	[ uuid(9A6F77A6-15F8-4441-952B-8910B4CF01E5),
+	  helpstring("Dispatch interface for HelloWorld Control"), hidden ]
+	dispinterface _DHelloWorld
+	{
+		properties:
+			// NOTE - ClassWizard will maintain property information here.
+			//    Use extreme caution when editing this section.
+			//{{AFX_ODL_PROP(CHelloWorldCtrl)
+			//}}AFX_ODL_PROP
+
+		methods:
+			// NOTE - ClassWizard will maintain method information here.
+			//    Use extreme caution when editing this section.
+			//{{AFX_ODL_METHOD(CHelloWorldCtrl)
+			[id(1)] BSTR Show();
+			//}}AFX_ODL_METHOD
+
+			[id(DISPID_ABOUTBOX)] void AboutBox();
+	};
+
+	//  Event dispatch interface for CHelloWorldCtrl
+
+	[ uuid(A870BF40-9E35-4DB5-8902-BC9E7D95A543),
+	  helpstring("Event interface for HelloWorld Control") ]
+	dispinterface _DHelloWorldEvents
+	{
+		properties:
+			//  Event interface has no properties
+
+		methods:
+			// NOTE - ClassWizard will maintain event information here.
+			//    Use extreme caution when editing this section.
+			//{{AFX_ODL_EVENT(CHelloWorldCtrl)
+			//}}AFX_ODL_EVENT
+	};
+
+	//  Class information for CHelloWorldCtrl
+
+	[ uuid(1FD70071-431F-44AA-88B4-ECD33355E77C),
+	  helpstring("HelloWorld Control"), control ]
+	coclass HelloWorld
+	{
+		[default] dispinterface _DHelloWorld;
+		[default, source] dispinterface _DHelloWorldEvents;
+	};
+
+
+	//{{AFX_APPEND_ODL}}
+	//}}AFX_APPEND_ODL}}
+};
