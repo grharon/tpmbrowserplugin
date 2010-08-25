@@ -244,6 +244,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\resource.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ScriptablePluginObject.h"
 				>
 			</File>

@@ -10,8 +10,6 @@ typedef jint (JNICALL *CreateJavaVM_t) (JavaVM **pvm, void **penv, JavaVMInitArg
 typedef jint (JNICALL *GetCreatedJavaVMs_t) (JavaVM **pvm, jsize, jsize*);
 #endif
 
-#define USER_CLASSPATH "./" // where to find Java class
-
 static JNIEnv* env_a = NULL;
 
 int loadJVM() {
@@ -24,9 +22,9 @@ int loadJVM() {
   CreateJavaVM_t createJavaVM;
   GetCreatedJavaVMs_t getCreatedJavaVMs;
 #endif
-  options[0].optionString ="-Djava.class.path="USER_CLASSPATH;
-  options[1].optionString ="-verbose:jni";
-  options[2].optionString ="-Djava.compiler=NONE";
+  options[0].optionString ="-verbose:jni";
+  options[1].optionString ="-Djava.compiler=NONE";
+	options[2].optionString ="-Djava.class.path=./;D:\\TPM\\TPMUtil\\TPMUtils\\bin\\";
   memset(&vm_args,0,sizeof(vm_args));
   vm_args.version = JNI_VERSION_1_2;
   vm_args.nOptions = OPTNUM;
@@ -137,6 +135,34 @@ static HINSTANCE loadJVMLibrary(void) {
 }
 #endif
 
+int my_initjni(JavaVM** jvm, JNIEnv** env) {
+	// Attach current thread to JavaVM
+	jint status;
+
+	if (!env_a)
+		return -1;
+	env_a->GetJavaVM(jvm);
+	status = (*jvm)->AttachCurrentThread((void**)env, NULL);
+  if (status != JNI_OK) {
+		fprintf(stderr, "Can't attach to JVM, return = %d\n", status);
+		return -2;
+  }
+	return 0;
+}
+
+int my_finijni(JavaVM** jvm, JNIEnv** env) {
+	// ignore exceptions here?
+	jint status;
+  if ((*env)->ExceptionOccurred()) {
+    (*env)->ExceptionDescribe();
+  }
+	status = (*jvm)->DetachCurrentThread();
+	if (status != JNI_OK) {
+		fprintf(stderr, "Can't detach from JVM, return = %d\n", status);
+		return -2;
+	}
+	return 0;
+}
 
 int jnitest() {
   JNIEnv *env;
@@ -148,17 +174,9 @@ int jnitest() {
   jclass stringClass;
   jobjectArray args;
 
-	// Attach current thread to JavaVM
-	if (!env_a)
+	if (my_initjni(&jvm, &env)) {
 		return -1;
-	env_a->GetJavaVM(&jvm);
-	status = jvm->AttachCurrentThread((void**)&env, NULL);
-
-  if (status != JNI_OK) {
-		fprintf(stderr, "Can't attach to Java VM: %d\n", status);
-		return -2;
-  }
-
+	}
 	printf("version = %x\n",env->GetVersion());
 	// Find class
   cls = env->FindClass("Prog");
@@ -216,6 +234,42 @@ destroy:
   if (env->ExceptionOccurred()) {
     env->ExceptionDescribe();
   }
-	jvm->DetachCurrentThread();
+	my_finijni(&jvm, &env);
 	return 0;
+}
+
+char* jni_doSignature(char* randomString, char* tpmPass) {
+  JNIEnv *env;
+	JavaVM *jvm;
+	char *ret = NULL;
+	jclass cls;
+	jboolean iscopy = JNI_TRUE;
+	if (my_initjni(&jvm, &env)) {
+		return NULL;
+	}
+	cls = env->FindClass("com.intel.splat.identityservice.tpm.TPMSign_m");
+	jmethodID mid = env->GetMethodID(cls,"doSignature","(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
+	jstring randomstr = env->NewStringUTF(randomString);
+	jstring tpmpass = env->NewStringUTF(tpmPass);
+	jstring retstr = (jstring)env->CallStaticObjectMethod(cls,mid,randomstr,tpmpass);
+	ret = (char*) env->GetStringUTFChars(retstr,&iscopy);//copy jstring
+	my_finijni(&jvm, &env);
+	return ret;
+}
+
+char* jni_getPublicKeyContent() {
+  JNIEnv *env;
+	JavaVM *jvm;
+	char *ret = NULL;
+	jclass cls;
+	jboolean iscopy = JNI_TRUE;
+	if (my_initjni(&jvm, &env)) {
+		return NULL;
+	}
+	cls = env->FindClass("com.intel.splat.identityservice.tpm.TPMSign_m");
+	jmethodID mid = env->GetMethodID(cls,"getPublicKeyContent","()Ljava/lang/String;");
+	jstring retstr = (jstring)env->CallStaticObjectMethod(cls,mid);
+	ret = (char*) env->GetStringUTFChars(retstr,&iscopy);//copy jstring
+	my_finijni(&jvm, &env);
+	return ret;
 }
