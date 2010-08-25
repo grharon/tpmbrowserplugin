@@ -46,7 +46,7 @@
 char*
 NPP_GetMIMEDescription(void)
 {
-  return "application/mozilla-npruntime-scriptable-plugin:.:Scriptability Demo Plugin";
+  return "application/npruntime-tpm-plugin:.:npruntime tpm plugin";
 }
 
 
