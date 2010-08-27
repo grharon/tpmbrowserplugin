@@ -1,8 +1,10 @@
 /* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
+#include <npapi.h>
+#include <stdlib.h>
+
 #include "ScriptablePluginObject.h"
 #include "ConstructablePluginObject.h"
 #include "fix.h"
-#include "npapi.h"
 #include "jnitest.h"
 
 bool
@@ -98,26 +100,48 @@ result : return value
     STRINGZ_TO_NPVARIANT(m_strdup("ok"), *result);
   }
 	else if (name == doSignature_id) {
+		NPString str;
+		str.UTF8Characters = "alert('call doSignature_id(String,String)');";
+		str.UTF8Length = strlen(str.UTF8Characters);
+		VOID_TO_NPVARIANT(*result);
+
 		if ((argCount == 2) && (NPVARIANT_IS_STRING(args[0])) && (NPVARIANT_IS_STRING(args[1]))) {
+			char *name = NULL;
+			char *pwd = NULL;
 			NPString nameS = NPVARIANT_TO_STRING(args[0]);
 			NPString pwdS = NPVARIANT_TO_STRING(args[1]);
-			NPString str;
-			str.UTF8Characters = "alert('call doSignature_id(String,String)');";
-			str.UTF8Length = strlen(str.UTF8Characters);
+			m_strFromNP(&name,nameS);
+			m_strFromNP(&pwd,pwdS);
+			printf("%s %s",name,pwd);
 			NPN_Evaluate(this->mNpp, sWindowNPObj, &str, NULL);
-			STRINGZ_TO_NPVARIANT(m_strdup("signature"), *result);
+			char* ret = jni_doSignature(name,pwd);
+			printf("ret=%x\n",ret);
+			/*
+	char buf[50];
+	scanf("%s",buf);
+			*/
+
+			/*
+			if (ret)
+				STRINGZ_TO_NPVARIANT(m_strdup(ret),*result);
+			*/
 		}
-		else VOID_TO_NPVARIANT(*result);// set result to void, cause an error?
 	}
 	else if (name == getPublicKeyContent_id) {
+		NPString str;
+		str.UTF8Characters = "alert('call getPublicKeyContent()');";
+		str.UTF8Length = strlen(str.UTF8Characters);
+		VOID_TO_NPVARIANT(*result);
 		if (argCount == 0) {
-			NPString str;
-			str.UTF8Characters = "alert('call getPublicKeyContent_id()');";
-			str.UTF8Length = strlen(str.UTF8Characters);
 			NPN_Evaluate(this->mNpp, sWindowNPObj, &str, NULL);
-			STRINGZ_TO_NPVARIANT(m_strdup("publickeycontent"), *result);
+			char *ret = jni_getPublicKeyContent();
+			printf("ret=%x\n",ret);
+			/*
+			if (ret) {
+				STRINGZ_TO_NPVARIANT(m_strdup(ret), *result);
+			}
+			*/
 		}
-		else VOID_TO_NPVARIANT(*result);// set result to void, cause an error?
 	}
 	else if (name == jnitest_id) {
 		jnitest();

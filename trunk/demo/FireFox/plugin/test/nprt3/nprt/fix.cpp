@@ -1,4 +1,5 @@
 #include "fix.h"
+#include <stdio.h>
 
 char * m_strdup(char *src) {
 	char *ret = NULL;
@@ -13,9 +14,21 @@ char * m_strdup(char *src) {
 	return ret;
 }
 
+char * m_strndup(char *src, int len) {
+	char *ret = NULL;
+	if ((src) && (len >= 0)) {
+		ret = (char*) NPN_MemAlloc(len+1);
+		strncpy(ret,src,len);
+		ret[len] = '\0';
+	}
+	return ret;
+}
+
 void m_strFromNP(char **dst, NPString src) {
-	if (!dst)
+	// dst should not be a pointer without initailization
+	if (dst == NULL)
 		return;
+	// free old pointer values
 	if (*dst) {
 		NPN_MemFree(*dst);
 		*dst = NULL;
