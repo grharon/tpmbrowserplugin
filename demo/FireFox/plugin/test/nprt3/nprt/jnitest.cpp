@@ -24,7 +24,7 @@ int loadJVM() {
 #endif
   options[0].optionString ="-verbose:jni";
   options[1].optionString ="-Djava.compiler=NONE";
-	options[2].optionString ="-Djava.class.path=./;D:\\TPM\\TPMUtil\\TPMUtils\\bin\\";
+	options[2].optionString ="-Djava.class.path=./;D:/TPM/TPMUtil/TPMUtils/bin/;D:/TPM/TPMUtil/TPMUtils/lib/";
   memset(&vm_args,0,sizeof(vm_args));
   vm_args.version = JNI_VERSION_1_2;
   vm_args.nOptions = OPTNUM;
@@ -242,34 +242,70 @@ char* jni_doSignature(char* randomString, char* tpmPass) {
   JNIEnv *env;
 	JavaVM *jvm;
 	char *ret = NULL;
-	jclass cls;
 	jboolean iscopy = JNI_TRUE;
 	if (my_initjni(&jvm, &env)) {
 		return NULL;
 	}
-	cls = env->FindClass("com.intel.splat.identityservice.tpm.TPMSign_m");
-	jmethodID mid = env->GetMethodID(cls,"doSignature","(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
-	jstring randomstr = env->NewStringUTF(randomString);
+	jclass cls = env->FindClass("com/intel/splat/identityservice/tpm/TPMSign");
+	if (cls == NULL) {
+		goto destroy2;
+	}
+	jmethodID mid = env->GetStaticMethodID(cls,"doSignature","(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
+	if (mid == NULL) {
+		goto destroy2;
+	}
+	jstring randomstr = NULL;
+	if (randomString)
+		randomstr = env->NewStringUTF(randomString);
 	jstring tpmpass = env->NewStringUTF(tpmPass);
 	jstring retstr = (jstring)env->CallStaticObjectMethod(cls,mid,randomstr,tpmpass);
-	ret = (char*) env->GetStringUTFChars(retstr,&iscopy);//copy jstring
+	printf("retstr = %x, ",retstr);
+	if (retstr) {
+		const char* value = (char*) env->GetStringUTFChars(retstr,&iscopy);//copy jstring
+		int len = env->GetStringUTFLength(retstr);//get string length
+		printf("ret value is = %s\n",value);
+	}
+destroy2:
+	// detect exceptions
+  if (env->ExceptionOccurred()) {
+    env->ExceptionDescribe();
+  }
 	my_finijni(&jvm, &env);
 	return ret;
 }
 
 char* jni_getPublicKeyContent() {
-  JNIEnv *env;
-	JavaVM *jvm;
-	char *ret = NULL;
-	jclass cls;
+  JNIEnv *env = NULL;
+	JavaVM *jvm = NULL;
+	char* ret = NULL;
 	jboolean iscopy = JNI_TRUE;
 	if (my_initjni(&jvm, &env)) {
 		return NULL;
 	}
-	cls = env->FindClass("com.intel.splat.identityservice.tpm.TPMSign_m");
-	jmethodID mid = env->GetMethodID(cls,"getPublicKeyContent","()Ljava/lang/String;");
-	jstring retstr = (jstring)env->CallStaticObjectMethod(cls,mid);
-	ret = (char*) env->GetStringUTFChars(retstr,&iscopy);//copy jstring
+	jclass cls = env->FindClass("com/intel/splat/identityservice/tpm/TPMSign");
+	if (cls == NULL) {
+		goto destroy;
+	}
+	jmethodID mid = env->GetStaticMethodID(cls,"getPublicKeyContent","()Ljava/lang/String;");
+	if (mid == NULL) {
+		goto destroy;
+	}
+
+	jstring retstr = (jstring) env->CallStaticObjectMethod(cls,mid);
+	printf("retstr = %x, ",retstr);
+	if (retstr) {
+		const char *value = env->GetStringUTFChars(retstr,&iscopy);//copy jstring
+		int len = env->GetStringUTFLength(retstr);//get string length
+		printf("ret value is = %s\n",value);
+//	ret = m_strdup((char*)value);
+	}
+	
+destroy:
+	// detect exceptions
+  if (env->ExceptionOccurred()) {
+    env->ExceptionDescribe();
+  }
 	my_finijni(&jvm, &env);
+//	printf("ret = %x, %s\n",ret,ret);
 	return ret;
 }

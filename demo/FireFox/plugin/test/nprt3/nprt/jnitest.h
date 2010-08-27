@@ -4,5 +4,7 @@
 int jnitest();
 int loadJVM();
 void unloadJVM();
+char* jni_doSignature(char* randomString, char* tpmPass);
+char* jni_getPublicKeyContent();
 
 #endif
