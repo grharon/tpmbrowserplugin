@@ -41,7 +41,6 @@
 // most are just empty stubs for this particular plugin 
 //
 #include "plugin.h"
-#include "jnitest.h"
 
 char*
 NPP_GetMIMEDescription(void)
@@ -53,15 +52,11 @@ NPP_GetMIMEDescription(void)
 
 NPError NPP_Initialize(void)
 {
-	if (loadJVM())
-		return NPERR_GENERIC_ERROR;
-	else 
-		return NPERR_NO_ERROR;
+	return NPERR_NO_ERROR;
 }
 
 void NPP_Shutdown(void)
 {
-	unloadJVM();
 }
 
 // here the plugin creates an instance of our CPlugin object which 

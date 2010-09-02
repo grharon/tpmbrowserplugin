@@ -1,7 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nprt2", "nprt\nprt.vcproj", "{539C8B1C-00D8-4427-9BF9-854B9E72C794}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nprt3", "nprt\nprt.vcproj", "{539C8B1C-00D8-4427-9BF9-854B9E72C794}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "jnicall", "jnicall\jnicall.vcproj", "{17F1D6D6-A521-4275-897E-C5F596D77EF5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,6 +15,10 @@ Global
 		{539C8B1C-00D8-4427-9BF9-854B9E72C794}.Debug|Win32.Build.0 = Debug|Win32
 		{539C8B1C-00D8-4427-9BF9-854B9E72C794}.Release|Win32.ActiveCfg = Release|Win32
 		{539C8B1C-00D8-4427-9BF9-854B9E72C794}.Release|Win32.Build.0 = Release|Win32
+		{17F1D6D6-A521-4275-897E-C5F596D77EF5}.Debug|Win32.ActiveCfg = Debug|Win32
+		{17F1D6D6-A521-4275-897E-C5F596D77EF5}.Debug|Win32.Build.0 = Debug|Win32
+		{17F1D6D6-A521-4275-897E-C5F596D77EF5}.Release|Win32.ActiveCfg = Release|Win32
+		{17F1D6D6-A521-4275-897E-C5F596D77EF5}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
