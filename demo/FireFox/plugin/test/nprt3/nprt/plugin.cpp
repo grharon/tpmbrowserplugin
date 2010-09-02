@@ -225,31 +225,6 @@ CPlugin::GetScriptableObject()
 #ifdef XP_WIN
 static LRESULT CALLBACK PluginWinProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-  switch (msg) {
-    case WM_PAINT:
-      {
-        // draw a frame and display the string
-        PAINTSTRUCT ps;
-        HDC hdc = BeginPaint(hWnd, &ps);
-        RECT rc;
-        GetClientRect(hWnd, &rc);
-        FrameRect(hdc, &rc, GetStockBrush(BLACK_BRUSH));
-        CPlugin * p = (CPlugin *)GetWindowLongPtr(hWnd, GWLP_USERDATA);
-        if(p) {
-          if (p->m_String[0] == 0) {
-            strcpy("foo", p->m_String);
-          }
-
-          DrawText(hdc, p->m_String, strlen(p->m_String), &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
-        }
-
-        EndPaint(hWnd, &ps);
-      }
-      break;
-    default:
-      break;
-  }
-
   return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 #endif

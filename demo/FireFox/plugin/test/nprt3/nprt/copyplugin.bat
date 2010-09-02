@@ -1,7 +1,8 @@
 echo "build xpi"
 mkdir xpi
 mkdir xpi\plugins
-copy /y ..\debug\nprt2.dll xpi\plugins\nprt.dll
+copy /y ..\debug\*.dll xpi\plugins\
+copy /y ..\debug\*.exe xpi\plugins\
 copy /y .\install.rdf xpi\
 cd xpi
 jar cvfM ..\nprt.xpi -C ./ *.*

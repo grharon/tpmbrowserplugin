@@ -1,24 +1,21 @@
 /* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
-#include <npapi.h>
-#include <stdlib.h>
-
 #include "ScriptablePluginObject.h"
 #include "ConstructablePluginObject.h"
 #include "fix.h"
-#include "jnitest.h"
+
+#include <npapi.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <process.h>
 
 bool
 ScriptablePluginObject::HasMethod(NPIdentifier name)
 {
-	// method for GETURL API test
-	NPIdentifier GetURL_id = NPN_GetStringIdentifier("GetURL");
 	// method for login.jsp test
 	NPIdentifier doSignature_id = NPN_GetStringIdentifier("doSignature");
 	NPIdentifier getPublicKeyContent_id = NPN_GetStringIdentifier("getPublicKeyContent");
-	NPIdentifier jnitest_id = NPN_GetStringIdentifier("jnitest");
 
-  return ((name == GetURL_id) || (name == doSignature_id) || 
-		(name == getPublicKeyContent_id) || (name == jnitest_id) );
+  return ((name == doSignature_id) || (name == getPublicKeyContent_id));
 }
 
 bool
@@ -71,12 +68,9 @@ result : return value
 	NPError err;
 	if (!this->HasMethod(name))
 		return false;
-	//GetURL test
-	NPIdentifier GetURL_id = NPN_GetStringIdentifier("GetURL");
 	//login.jsp test
 	NPIdentifier doSignature_id = NPN_GetStringIdentifier("doSignature");
 	NPIdentifier getPublicKeyContent_id = NPN_GetStringIdentifier("getPublicKeyContent");
-	NPIdentifier jnitest_id = NPN_GetStringIdentifier("jnitest");
 
 	NPObject* sWindowNPObj;
 
@@ -85,67 +79,97 @@ result : return value
 		return false;
 	}
 
-	// GetURL code
-  if (name == GetURL_id) {
-    printf("GetURL() called\n");
-		if (rURL) {
-			if (NPN_GetURL(mNpp, rURL, "_self") != NPERR_NO_ERROR) {
-				printf("error on converting GetURL\n");
-			}
-		} else {
-			if (NPN_GetURL(mNpp, "http://www.google.com.hk/","_self") != NPERR_NO_ERROR) {
-				printf("error on converting GetURL\n");
-			}
-		}
-    STRINGZ_TO_NPVARIANT(m_strdup("ok"), *result);
-  }
-	else if (name == doSignature_id) {
-		NPString str;
-		str.UTF8Characters = "alert('call doSignature_id(String,String)');";
-		str.UTF8Length = strlen(str.UTF8Characters);
-		VOID_TO_NPVARIANT(*result);
+	char *tmpdir = getenv("tmpdir");
+	if (tmpdir == NULL)
+#ifdef _WINDOWS
+		tmpdir = "C:\\";
+#else
+		tmpdir = "~/"
+#endif
 
+	if (name == doSignature_id) {
 		if ((argCount == 2) && (NPVARIANT_IS_STRING(args[0])) && (NPVARIANT_IS_STRING(args[1]))) {
-			char *name = NULL;
-			char *pwd = NULL;
-			NPString nameS = NPVARIANT_TO_STRING(args[0]);
-			NPString pwdS = NPVARIANT_TO_STRING(args[1]);
-			m_strFromNP(&name,nameS);
-			m_strFromNP(&pwd,pwdS);
-			printf("%s %s",name,pwd);
-			NPN_Evaluate(this->mNpp, sWindowNPObj, &str, NULL);
-			char* ret = jni_doSignature(name,pwd);
-			printf("ret=%x\n",ret);
-			/*
-	char buf[50];
-	scanf("%s",buf);
-			*/
+			char *randomStr = NULL;
+			char *tpmPass = NULL;
+			NPString n_randomStr = NPVARIANT_TO_STRING(args[0]);
+			NPString n_tpmPass = NPVARIANT_TO_STRING(args[1]);
+			m_strFromNP(&randomStr,n_randomStr);
+			m_strFromNP(&tpmPass,n_tpmPass);
+			printf("input = %s, %s",randomStr, tpmPass);
 
-			/*
-			if (ret)
-				STRINGZ_TO_NPVARIANT(m_strdup(ret),*result);
-			*/
+			char* ret = NULL;
+			char *fname = tempnam(tmpdir,"jni");
+			if (fname == NULL)
+				fname = "tmp";
+			char* margs[10];
+			margs[0] = "jnicall.exe";
+			margs[1] = "--file";
+			margs[2] = fname;
+			margs[3] = "--method";
+			margs[4] = "doSignature";
+			margs[5] = "--args";
+			margs[6] = "2";
+			margs[7] = randomStr;
+			margs[8] = tpmPass;
+			margs[9] = NULL;
+			int rval = _spawnv(_P_WAIT,"c:\\jnicall",margs);
+			if (rval) {
+				fprintf(stderr,"error = %d\n",rval);
+			}
+			else {
+				ret = getFileContent(fname);
+				if (ret) {
+					STRINGZ_TO_NPVARIANT(ret,*result); 
+				}
+				else {
+					fprintf(stderr,"cannot read output file");
+				}
+				unlink(fname);
+			}
+			free(fname);
+		}
+		else {
+			NPString str;
+			str.UTF8Characters = "alert('usage: doSignature(String, String)');";
+			str.UTF8Length = strlen(str.UTF8Characters);
+			NPN_Evaluate(this->mNpp, sWindowNPObj, &str, NULL);
 		}
 	}
 	else if (name == getPublicKeyContent_id) {
-		NPString str;
-		str.UTF8Characters = "alert('call getPublicKeyContent()');";
-		str.UTF8Length = strlen(str.UTF8Characters);
-		VOID_TO_NPVARIANT(*result);
 		if (argCount == 0) {
-			NPN_Evaluate(this->mNpp, sWindowNPObj, &str, NULL);
-			char *ret = jni_getPublicKeyContent();
-			printf("ret=%x\n",ret);
-			/*
-			if (ret) {
-				STRINGZ_TO_NPVARIANT(m_strdup(ret), *result);
+			char *ret = NULL;
+			char *fname = tempnam(tmpdir,"jni");
+			if (fname == NULL)
+				fname = "tmp";
+			char* margs[6];
+			margs[0] = "jnicall.exe";
+			margs[1] = "--file";
+			margs[2] = fname;
+			margs[3] = "--method";
+			margs[4] = "getPublicKeyContent";
+			margs[5] = NULL;
+			int rval = _spawnv(_P_WAIT,"c:\\jnicall",margs);
+			if (rval) {
+				fprintf(stderr,"error = %d\n",rval);
 			}
-			*/
+			else {
+				ret = getFileContent(fname);
+				if (ret) {
+					STRINGZ_TO_NPVARIANT(ret,*result); 
+				}
+				else {
+					fprintf(stderr,"cannot read output file");
+				}
+				unlink(fname);
+			}
+			free(fname);
 		}
-	}
-	else if (name == jnitest_id) {
-		jnitest();
-		VOID_TO_NPVARIANT(*result);
+		else {
+			NPString str;
+			str.UTF8Characters = "alert('usage: getPublicKeyContent()');";
+			str.UTF8Length = strlen(str.UTF8Characters);
+			NPN_Evaluate(this->mNpp, sWindowNPObj, &str, NULL);
+		}
 	}
 	NPN_ReleaseObject(sWindowNPObj);
   return true;

@@ -22,27 +22,17 @@ window.
 
 <center>
 
-<embed id="embed1" type="application/npruntime-tpm-plugin" width="600" height="45" src="http://www.baidu.com" code="123465"><br>
-<embed id="embed2" type="application/npruntime-tpm-plugin" hidden="true" src="http://code.google.com" code="364237"><br>
+<embed id="embed1" type="application/npruntime-tpm-plugin" hidden="true">
 
 <br>
 <form name="formname">
-<input type=button value="embed1.GetURL()" onclick="document.getElementById('embed1').GetURL();">
 <input type=button value="alert(embed1.keyword)" onclick="alert(document.getElementById('embed1').keyword);">
 <input type=button value="embed1.keyword='foo'" onclick="document.getElementById('embed1').keyword='foo';">
 <input type=button value="embed1.keyword='3'" onclick="document.getElementById('embed1').keyword='3';">
-<input type=button value="embed1.jnitest()" onclick="document.getElementById('embed1').jnitest();">
 <input type=button value="alert(embed1.doSignature('123','456'))" onclick="alert(document.getElementById('embed1').doSignature('123','456'));">
 <input type=button value="alert(embed1.getPublicKeyContent())" onclick="alert(document.getElementById('embed1').getPublicKeyContent());">
-<br>
-<input type=button value="embed2.GetURL()" onclick="document.getElementById('embed2').GetURL();">
-<input type=button value="alert(embed2.keyword)" onclick="alert(document.getElementById('embed2').keyword);">
-<input type=button value="embed2.keyword='bar'" onclick="document.getElementById('embed2').keyword='bar';">
-<input type=button value="embed2.keyword='5'" onclick="document.getElementById('embed2').keyword='5';">
-<input type=button value="alert(embed2.code)" onclick="alert(document.getElementById('embed2').code);">
-</form>
 
 </center>
-<a href="http://www.google.com">just a link</a>
+
 </BODY>
 </HTML>

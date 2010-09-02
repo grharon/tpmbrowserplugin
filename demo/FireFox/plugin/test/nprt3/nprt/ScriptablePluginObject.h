@@ -13,7 +13,7 @@ public:
 		char ch[]="HELLO WORLD";
 		int len =strlen(ch);
 		this->keyword = (char*) NPN_MemAlloc(len+1);
-		strncpy(this->keyword, ch, len);
+		memcpy(this->keyword, ch, len);
 		this->keyword[len]='\0';
 		rURL = NULL;
 		code = NULL;
