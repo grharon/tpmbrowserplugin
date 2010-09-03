@@ -21,7 +21,8 @@ void usage() {
 int main(int argc, char** argv) {
 	string tmpfile;
 	string method;
-	string classpath("D:/TPM/TPMUtil/TPMUtils/bin/;D:/TPM/TPMUtil/TPMUtils/lib/tpmj.jar");
+	string classpath("D:/tail/TPM/TPM\ emluator/TPMSignatureApplet/bin/;D:/tail/TPM/TPM\ emluator/TPMSignatureApplet/lib/bouncycastle-jce-jdk13-112.jar;");
+//	string classpath("D:/TPM/TPMUtil/TPMUtils/bin/;D:/TPM/TPMUtil/TPMUtils/lib/tpmj.jar");
 	string eofstr("");
 	int argnum = 0;
 	char** args = NULL;
