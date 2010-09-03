@@ -112,6 +112,8 @@ result : return value
 			margs[7] = randomStr;
 			margs[8] = tpmPass;
 			margs[9] = NULL;
+			// in windows use registry to find Firefox directory
+			// in other OS, use path _spawnvp
 			int rval = _spawnv(_P_WAIT,"c:\\jnicall",margs);
 			if (rval) {
 				fprintf(stderr,"error = %d\n",rval);

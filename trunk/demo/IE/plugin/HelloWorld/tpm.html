@@ -1,0 +1,95 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>getandpost</title>
+		<script type="text/javascript">
+			
+			var xmlHttpRequest;
+			function createXMLHttpRequest()
+			{
+				if(window.ActiveXObject)
+				{
+					xmlHttpRequest=new ActiveXObject("Microsoft.XMLHTTP");
+				}
+				else 
+				if(window.XMLHttpRequest)
+				{
+					xmlHttpRequest=new XMLHttpRequest();
+				}
+			}
+			
+			function createQueryString()
+			{
+				var obj = document.getElementById("hello1"); 
+    		var tpmcode=obj.Show();
+    		alert(tpmcode);
+				var name=document.getElementById("name").value;
+				var password=document.getElementById("password").value;
+				var queryString="name="+name+"&password="+password+"&tpmcode="+tpmcode;
+				return queryString;
+			}
+			
+			function post()
+			{
+				createXMLHttpRequest();
+				var url="GetAndPost? timeStamp= "+new Date().getTime();
+				var queryString=createQueryString();
+				xmlHttpRequest.open("POST",url,true);
+				xmlHttpRequest.onreadystatechange=stateChange;
+				xmlHttpRequest.setRequestHeader("Content-Type","application/x-www-form-urlencoded;");
+				xmlHttpRequest.send(queryString);
+			}
+			
+			function stateChange()
+			{
+				if(xmlHttpRequest.readyState==4)
+				{
+					if(xmlHttpRequest.status==200)
+					{
+						showResult();
+					}
+				}
+			}
+			
+			function showResult()
+			{
+				var result=document.getElementById("server");
+				if(result.hasChildNodes())
+				{
+					result.removeChild(result.chileNodes[0]);
+				}
+				var text=document.createTextNode(xmlHttpRequest.responseText);
+				result.appendChild(text);
+			}
+		</script>
+	</head>
+	<body>
+		<object ID="Hello1" CLASSID="CLSID:1FD70071-431F-44AA-88B4-ECD33355E77C"> 
+     	<PARAM NAME="_Version" VALUE="65536"> 
+      <PARAM NAME="_ExtentX" VALUE="0"> 
+      <PARAM NAME="_ExtentY" VALUE="0"> 
+      <PARAM NAME="_StockProps" VALUE="0"> 
+    </object>
+	 	<b>Enter your name and password please!</b><p/>
+	 		<table>
+	 			<tbody>
+	 				<tr>
+	 					<td>Name:</td>
+						<td><input type="text" id="name"></td>
+					</tr>
+					<tr>
+						<td>Password:</td>
+						<td><input type="text" id="password"></td>
+					</tr>
+				</tbody>
+			</table>
+			<form action="#">
+				<input type="button" value="submit" onclick="post();"/><p/>
+			</form>
+			<p/>
+			<b>Server Response:</b>
+		  <div id="server">
+		  </div>	
+	</body>
+</html>
