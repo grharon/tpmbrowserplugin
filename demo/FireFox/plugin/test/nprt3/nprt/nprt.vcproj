@@ -225,6 +225,10 @@
 				RelativePath=".\test.bat"
 				>
 			</File>
+			<File
+				RelativePath=".\tools.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -253,6 +257,10 @@
 			</File>
 			<File
 				RelativePath=".\ScriptablePluginObjectBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tools.h"
 				>
 			</File>
 		</Filter>

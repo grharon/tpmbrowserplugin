@@ -7,7 +7,8 @@
 using namespace std;
 
 void usage() {
-	cerr<<"<program name> --file <filename> --method <methodname> [--eof <eofline>] [--classpath <classpath>] [--args <argnum> <arg0, ...> ]"<<endl;
+	cerr<<"<program name> --debug --file <filename> --method <methodname> [--eof <eofline>] [--classpath <classpath>] [--args <argnum> <arg0, ...> ]"<<endl;
+	cerr<<"  debug		: output debug info"<<endl;
 	cerr<<"  filename : tmpfile name"<<endl;
 	cerr<<"  method   : method to call"<<endl;
 	cerr<<"  eof      : eof flag"<<endl;
@@ -21,18 +22,23 @@ void usage() {
 int main(int argc, char** argv) {
 	string tmpfile;
 	string method;
-	string classpath("D:/tail/TPM/TPM\ emluator/TPMSignatureApplet/bin/;D:/tail/TPM/TPM\ emluator/TPMSignatureApplet/lib/bouncycastle-jce-jdk13-112.jar;");
-//	string classpath("D:/TPM/TPMUtil/TPMUtils/bin/;D:/TPM/TPMUtil/TPMUtils/lib/tpmj.jar");
+	string classpath("");
 	string eofstr("");
 	int argnum = 0;
+	bool debug = false;
 	char** args = NULL;
 
-	printf("args = ");
-	for (int i=0;i<argc;i++) {
-		printf(" %s",argv[i]);
+	if (0) {
+		cout<<" arguments : ";
+		for (int i=0;i<argc;i++)
+			cout<<argv[i]<<' ';
+		cout<<endl;
 	}
-	printf("\n");
+
 	for (int i=0;i<argc;i++) {
+		if (!strcmp(argv[i],"--debug")) {
+			debug = true;
+		}
 		if (!strcmp(argv[i],"--file")) {
 			if (++i == argc)
 				usage();
@@ -67,43 +73,71 @@ int main(int argc, char** argv) {
 			}
 		}
 	}
+
 	if ((tmpfile.empty()) || (method.empty())) {
 		usage();
 	}
-	if (1) {
+
+	if (debug) {
 		cout<<"tmpfile = "<<tmpfile<<endl;
 		cout<<"method = "<<method<<endl;
 		cout<<"eof = "<<eofstr<<endl;
+		cout<<"classpath = "<<classpath<<endl;
 		cout<<"args = "<<argnum<<":";
 		for (int i=0;i<argnum;i++)
 			cout<<args[i]<<",";
 		cout<<endl;
 	}
-	int v = loadJVM(classpath.c_str());
-	printf("loadJVM = %d\n",v);
+	int v = loadJVM(classpath.c_str(), debug);
+	if (debug) {
+		cout<<"loadJVM = "<<v<<endl;
+	}
+	if (v != 0) {
+		cerr<<"Cannot load JVM"<<endl;
+		return -1;
+	}
+
 	char *ret = NULL;
-	bool fail;
+	bool fail = true;
 	if ((method == "doSignature") && (argnum == 2)) {
 		ret = jni_doSignature(fail, args[0], args[1]);
 	}
-	if ((method == "getPublicKeyContent") && (argnum == 0)) {
+	else if ((method == "getPublicKeyContent") && (argnum == 0)) {
 		ret = jni_getPublicKeyContent(fail);
 	}
-	printf("ret = %s\n",ret);
+	if (debug) {
+		if (ret)
+			cout<<"return value is "<<ret<<endl;
+		else
+			cout<<"return value is null"<<endl;
+	}
+
 	FILE* f = fopen(tmpfile.c_str(),"wb");
 	if (f) {
-		if (ret)
-			fwrite(ret,sizeof(char),strlen(ret),f);
+		if (ret) {
+			int len = strlen(ret);
+			int done = 0;
+			if ((done = fwrite(ret,sizeof(char),len,f)) != len) {
+				cerr<<"write "<<done<<" bytes, less than required "<<len<<" bytes.";
+				fail = true;
+			}
+		}
 /*
-		fwrite("\n",sizeof(char),1,f);
 		fwrite(eofstr.c_str(),sizeof(char),eofstr.size(),f);
 */
 		fflush(f);
 		fclose(f);
 	}
+	else {
+		cerr<<"cannot open "<<tmpfile<<endl;
+		fail = true;
+	}
+
 	destroyJVM();
-	if (fail)
+	if (fail) {
+		unlink(tmpfile.c_str());
 		return -1;
+	}
 	else
 		return 0;
 }

@@ -3,7 +3,7 @@
 
 char* jni_doSignature(bool& fail,char* randomString, char* tpmPass);
 char* jni_getPublicKeyContent(bool& fail);
-int loadJVM(const char* _classpath);
-void destroyJVM();
+int loadJVM(const char* _classpath, bool debug);
+int destroyJVM(void);
 
 #endif
