@@ -67,33 +67,25 @@ CPlugin::CPlugin(NPP pNPInstance, int16_t argc, char* argn[], char* argv[]):
 #ifdef XP_WIN
   m_hWnd = NULL;
 #endif
+	// code from npruntime, get browser version
 	const char *ua = NPN_UserAgent(m_pNPInstance);
   strcpy(m_String, ua);
 
-	// pass values to ScriptablePluginObject
-
+	// Here is an example of passing parameters from plugin to ScriptablePlugin
 	// initialize id
-  NPIdentifier rURL_id = NPN_GetStringIdentifier("rURL");
   NPIdentifier code_id = NPN_GetStringIdentifier("code");
 
-	NPVariant v1, v2;
-	bool ret;
-
+	NPVariant v1;
 	VOID_TO_NPVARIANT(v1);
-	VOID_TO_NPVARIANT(v2);
 
 	for (int16_t i = 0;i < argc;i++) {
 		printf("%s = %s\n", argn[i], argv[i]);
-		if (!strcmp(argn[i],"src")) {
+		if (!strcmp(argn[i],"code")) {
 			STRINGZ_TO_NPVARIANT(m_strdup(argv[i]),v1);
-		} else if (!strcmp(argn[i],"code")) {
-			STRINGZ_TO_NPVARIANT(m_strdup(argv[i]),v2);
 		}
   }
-
 	NPObject *myobj = this->GetScriptableObject();
-	NPN_SetProperty(m_pNPInstance, myobj, rURL_id, &v1);
-	NPN_SetProperty(m_pNPInstance, myobj, code_id, &v2);
+	NPN_SetProperty(m_pNPInstance, myobj, code_id, &v1);
   NPN_ReleaseObject(myobj);
 }
 

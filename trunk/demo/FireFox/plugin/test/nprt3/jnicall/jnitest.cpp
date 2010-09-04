@@ -1,7 +1,9 @@
 #include "jnitest.h"
 #include <jni.h>
 #include <stdlib.h>
-#include <string.h>
+//#include <string.h>
+#include <iostream>
+using namespace std;
 
 #ifdef _WINDOWS
 #include <windows.h>
@@ -14,7 +16,7 @@ typedef jint (JNICALL *GetCreatedJavaVMs_t) (JavaVM **pvm, jsize, jsize*);
 static JavaVM* jvm = NULL;
 static JNIEnv* env = NULL;
 
-int loadJVM(const char* _classpath) {
+int loadJVM(const char* _classpath, bool debug) {
   JavaVMInitArgs vm_args;
   jint status;
   const int OPTNUM = 3;
@@ -35,11 +37,14 @@ int loadJVM(const char* _classpath) {
   strncat(str,classpath,strlen(classpath));
   str[len] = '\0';
   options[0].optionString =str;
-  options[1].optionString ="-verbose:jni";
-  options[2].optionString ="-Djava.compiler=NONE";
+  options[1].optionString ="-Djava.compiler=NONE";
+  options[2].optionString ="-verbose:jni";
   memset(&vm_args,0,sizeof(vm_args));
   vm_args.version = JNI_VERSION_1_2;
-  vm_args.nOptions = OPTNUM;
+  if (debug)
+		vm_args.nOptions = OPTNUM;
+	else
+		vm_args.nOptions = OPTNUM - 1;
   vm_args.ignoreUnrecognized = JNI_TRUE;
   vm_args.options = options;
 
@@ -47,6 +52,9 @@ int loadJVM(const char* _classpath) {
   jsize jvm_count = 0;
 #ifdef _WINDOWS
 	HINSTANCE hjvmlib = loadJVMLibrary();
+	if (hjvmlib == NULL) {
+		return -1;
+	}
   createJavaVM = (CreateJavaVM_t)GetProcAddress(hjvmlib, "JNI_CreateJavaVM");
   getCreatedJavaVMs = (GetCreatedJavaVMs_t) GetProcAddress(hjvmlib, "JNI_GetCreatedJavaVMs");
 #endif
@@ -56,7 +64,9 @@ int loadJVM(const char* _classpath) {
 #else
   status = JNI_GetCreatedJavaVMs(jvms, 4, &jvm_count);
 #endif
-  printf("status = %d, jvm_count = %d\n",status,jvm_count);
+	if (debug) {
+		cout<<"GetCreatedJavaVMs = "<<status<<", JVM number = "<<jvm_count<<endl;
+	}
   if (jvm_count > 0) {
     jvm = jvms[0];
     jvm->AttachCurrentThread((void**)&env, &vm_args);
@@ -69,7 +79,7 @@ int loadJVM(const char* _classpath) {
 #endif
   }
   if (status == JNI_ERR) {
-    fprintf(stderr,"Error creating VM\n");
+		cerr<<"Error in creating JVM, return value = "<<status<<endl;
     return -1;
   }
 	return 0;
@@ -84,39 +94,43 @@ static int GetStringFromRegistry(HKEY key, const char*name, char*buf, jint bufsi
       && RegQueryValueEx(key, name, 0, 0, (LPBYTE)buf, &size) == 0;
 }
 
-static void GetPublicJREHome(char *buf, jint bufsize) {
+static bool GetPublicJREHome(char *buf, jint bufsize) {
   HKEY key, subkey;
   char version[MAX_PATH];
   char *JRE_KEY = "SOFTWARE\\JavaSoft\\Java Runtime Environment";
   if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, JRE_KEY, 0, KEY_READ, &key) != 0) {
-    fprintf(stderr, "Error opening registry key '%s'\n",JRE_KEY);
-    exit(1);
+		cerr<<"Error opening registry key '"<<JRE_KEY<<"'"<<endl;
+		return false;
   }
   if (!GetStringFromRegistry(key,"CurrentVersion",version,sizeof(version))) {
-    fprintf(stderr, "Failed reading value of registry key:\n\t%s\\CurrentVersion\n",JRE_KEY);
+		cerr<<"Failed reading value of registry key:"<<endl;
+		cerr<<"\t"<<JRE_KEY<<"\\CurrentVersion"<<endl;
     RegCloseKey(key);
-    exit(1);
+		return false;
   }
   /* Find directory where the current version is installed. */
   if (RegOpenKeyEx(key, version, 0, KEY_READ, &subkey) != 0) {
-    fprintf(stderr, "Error opening registry key '%s\\%s'\n", JRE_KEY, version);
-    exit(1);
+    cerr<<"Error opening registry key '"<<JRE_KEY<<"\\"<<version<<"'"<<endl;
+		return false;
   }
   if (!GetStringFromRegistry(subkey,"JavaHome",buf,bufsize)) {
-    fprintf(stderr, "Failed reading value of registry key:\n\t%s\\%s\\JavaHome\n", JRE_KEY, version);
+		cerr<<"Failed reading value of registry key:"<<endl;
+		cerr<<"\t"<<JRE_KEY<<"\\"<<version<<"\\JavaHome"<<endl;
     RegCloseKey(key);
     RegCloseKey(subkey);
-    exit(1);
+		return false;
   }
   RegCloseKey(key);
   RegCloseKey(subkey);
+	return true;
 }
 
 static HINSTANCE loadJVMLibrary(void) {
   HINSTANCE h1, h2;
   char msvcdll[MAX_PATH];
   char javadll[MAX_PATH];
-  GetPublicJREHome(msvcdll, MAX_PATH);
+  if (!GetPublicJREHome(msvcdll, MAX_PATH))
+		return NULL;
   strcpy(javadll, msvcdll);
   strncat(msvcdll, "\\bin\\msvcr71.dll", MAX_PATH - strlen(msvcdll));
   strncat(javadll, "\\bin\\client\\jvm.dll", MAX_PATH - strlen(javadll));
@@ -124,31 +138,32 @@ static HINSTANCE loadJVMLibrary(void) {
   javadll[MAX_PATH -1] = '\0';
   h1 = LoadLibrary(msvcdll);
   if (h1 == NULL) {
-    fprintf(stderr, "Can't load library %s\n",msvcdll);
-    exit(1);
+		cerr<<"Can't load library"<<msvcdll<<endl;
+		return NULL;
   }
   h2 = LoadLibrary(javadll);
   if (h2 == NULL) {
-    fprintf(stderr, "Can't load library %s\n",javadll);
-    exit(1);
+		cerr<<"Can't load library"<<javadll<<endl;
+		return NULL;
   }
   return h2;
 }
 #endif
 
-void destroyJVM(void) {
-  /*
+int destroyJVM(void) {
   // destroy JVM, but it really does no help
-  status = jvm->DestroyJavaVM();
+  jint status = jvm->DestroyJavaVM();
   if (status) {
-    fprintf(stderr, "Can't destroy Java VM\n");
-    exit(1);
+		cerr<<"Can't destroy JVM"<<endl;
+		//return -1;
   }
+	/*
   if (hjvmlib) {
     FreeLibrary(hjvmlib);
     hjvmlib = NULL;
   }
-  */
+	*/
+	return 0;
 }
 
 char* jni_getPublicKeyContent(bool& fail) {
@@ -172,9 +187,9 @@ char* jni_getPublicKeyContent(bool& fail) {
     const char *value = env->GetStringUTFChars(retstr,&iscopy);//copy jstring
 		int len = env->GetStringUTFLength(retstr);
 		ret = (char*) malloc(len+1);
-		strncpy(ret, value, len);
+		memcpy(ret, value, len * sizeof(char));
 		ret[len] = '\0';
-		printf("len = %d",len);
+		// cout<<"len = "<<len<<endl;
   }
 
 destroy:

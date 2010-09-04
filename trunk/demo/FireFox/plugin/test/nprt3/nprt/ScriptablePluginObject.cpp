@@ -2,6 +2,7 @@
 #include "ScriptablePluginObject.h"
 #include "ConstructablePluginObject.h"
 #include "fix.h"
+#include "tools.h"
 
 #include <npapi.h>
 #include <stdio.h>
@@ -14,8 +15,9 @@ ScriptablePluginObject::HasMethod(NPIdentifier name)
 	// method for login.jsp test
 	NPIdentifier doSignature_id = NPN_GetStringIdentifier("doSignature");
 	NPIdentifier getPublicKeyContent_id = NPN_GetStringIdentifier("getPublicKeyContent");
+	NPIdentifier test_id = NPN_GetStringIdentifier("test");
 
-  return ((name == doSignature_id) || (name == getPublicKeyContent_id));
+  return ((name == doSignature_id) || (name == getPublicKeyContent_id) || (name==test_id));
 }
 
 bool
@@ -23,10 +25,8 @@ ScriptablePluginObject::HasProperty(NPIdentifier name)
 {
 	// method for Keyword value
 	NPIdentifier keyword_id = NPN_GetStringIdentifier("keyword");
-	NPIdentifier rURL_id = NPN_GetStringIdentifier("rURL");
 	NPIdentifier code_id = NPN_GetStringIdentifier("code");
   return ((name == keyword_id) || 
-		(name == rURL_id) ||
 		(name == code_id));
 }
 
@@ -38,16 +38,11 @@ ScriptablePluginObject::GetProperty(NPIdentifier name, NPVariant *result)
 		return false;
 	}
 	NPIdentifier keyword_id = NPN_GetStringIdentifier("keyword");
-	NPIdentifier rURL_id = NPN_GetStringIdentifier("rURL");
 	NPIdentifier code_id = NPN_GetStringIdentifier("code");
   if (name == keyword_id) {
 		if (keyword)
 			STRINGZ_TO_NPVARIANT(m_strdup(keyword), *result);// add reference here
   }
-	else if (name == rURL_id) {
-		if (rURL)
-			STRINGZ_TO_NPVARIANT(m_strdup(rURL), *result);// add reference here
-	}
 	else if (name == code_id) {
 		if (code)
 			STRINGZ_TO_NPVARIANT(m_strdup(code), *result);// add reference here
@@ -65,12 +60,27 @@ argCount : number of arguments
 result : return value
 */
 {
+	NPIdentifier test_id = NPN_GetStringIdentifier("test");
+	if (name == test_id) {
+		printf("temp = %s\n",getTemporaryPath());
+		printf("home = %s\n",getHomePath());
+		printf("firefox = %s\n",getFirefoxPath());
+		printf("conf = %s\n",getConfPath());
+		printf("classpath = %s\n",getClassPath());
+		printf("spawn = %s\n",getSpawnPath());
+		VOID_TO_NPVARIANT(*result);
+		return true;
+	}
+
 	NPError err;
 	if (!this->HasMethod(name))
 		return false;
+	VOID_TO_NPVARIANT(*result);
+
 	//login.jsp test
 	NPIdentifier doSignature_id = NPN_GetStringIdentifier("doSignature");
 	NPIdentifier getPublicKeyContent_id = NPN_GetStringIdentifier("getPublicKeyContent");
+
 
 	NPObject* sWindowNPObj;
 
@@ -79,13 +89,9 @@ result : return value
 		return false;
 	}
 
-	char *tmpdir = getenv("tmpdir");
-	if (tmpdir == NULL)
-#ifdef _WINDOWS
-		tmpdir = "C:\\";
-#else
-		tmpdir = "~/"
-#endif
+	const char *tmpdir = getTemporaryPath();
+	const char *classpath = getClassPath();
+	const char *spawnpath = getSpawnPath();
 
 	if (name == doSignature_id) {
 		if ((argCount == 2) && (NPVARIANT_IS_STRING(args[0])) && (NPVARIANT_IS_STRING(args[1]))) {
@@ -101,20 +107,22 @@ result : return value
 			char *fname = tempnam(tmpdir,"jni");
 			if (fname == NULL)
 				fname = "tmp";
-			char* margs[10];
-			margs[0] = "jnicall.exe";
+			char* margs[12];
+			margs[0] = (char*) spawn_file;
 			margs[1] = "--file";
 			margs[2] = fname;
 			margs[3] = "--method";
 			margs[4] = "doSignature";
-			margs[5] = "--args";
-			margs[6] = "2";
-			margs[7] = randomStr;
-			margs[8] = tpmPass;
-			margs[9] = NULL;
+			margs[5] = "--classpath";
+			margs[6] = (char*) classpath;
+			margs[7] = "--args";
+			margs[8] = "2";
+			margs[9] = randomStr;
+			margs[10] = tpmPass;
+			margs[11] = NULL;
 			// in windows use registry to find Firefox directory
 			// in other OS, use path _spawnvp
-			int rval = _spawnv(_P_WAIT,"c:\\jnicall",margs);
+			int rval = _spawnv(_P_WAIT,spawnpath,margs);
 			if (rval) {
 				fprintf(stderr,"error = %d\n",rval);
 			}
@@ -143,14 +151,16 @@ result : return value
 			char *fname = tempnam(tmpdir,"jni");
 			if (fname == NULL)
 				fname = "tmp";
-			char* margs[6];
-			margs[0] = "jnicall.exe";
+			char* margs[8];
+			margs[0] = (char*) spawn_file;
 			margs[1] = "--file";
 			margs[2] = fname;
 			margs[3] = "--method";
 			margs[4] = "getPublicKeyContent";
-			margs[5] = NULL;
-			int rval = _spawnv(_P_WAIT,"c:\\jnicall",margs);
+			margs[5] = "--classpath";
+			margs[6] = (char*) classpath;
+			margs[7] = NULL;
+			int rval = _spawnv(_P_WAIT,spawnpath,margs);
 			if (rval) {
 				fprintf(stderr,"error = %d\n",rval);
 			}
@@ -196,15 +206,11 @@ ScriptablePluginObject::SetProperty(NPIdentifier name,
 		return false;
 	}
 	NPIdentifier keyword_id = NPN_GetStringIdentifier("keyword");
-	NPIdentifier rURL_id = NPN_GetStringIdentifier("rURL");
 	NPIdentifier code_id = NPN_GetStringIdentifier("code");
 
   if (name == keyword_id) {
 		printf("call SetProperty::keyword\n");
 		m_strFromVar(&keyword,*value);
-	} else if (name == rURL_id) {
-		printf("call SetProperty::rURL\n");
-		m_strFromVar(&rURL,*value);
 	} else if (name == code_id) {
 		printf("call SetProperty::code\n");
 		m_strFromVar(&code,*value);

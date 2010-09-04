@@ -3,6 +3,7 @@
 
 #ifndef SCRIPTABLEPLUGINOBJECT_H
 #define SCRIPTABLEPLUGINOBJECT_H
+#include "fix.h"
 
 class ScriptablePluginObject : public ScriptablePluginObjectBase
 {
@@ -10,20 +11,16 @@ public:
   ScriptablePluginObject(NPP npp)
     : ScriptablePluginObjectBase(npp)
   {
-		char ch[]="HELLO WORLD";
-		int len =strlen(ch);
-		this->keyword = (char*) NPN_MemAlloc(len+1);
-		memcpy(this->keyword, ch, len);
-		this->keyword[len]='\0';
-		rURL = NULL;
+		// sample of initialized value : keyword	
+		keyword = m_strdup("HELLO WORLD");
+		// sample of uninitailized value : code
 		code = NULL;
   }
 
 	virtual ~ScriptablePluginObject() {
+		// dealloc memory
 		if (keyword)
 			NPN_MemFree(keyword);
-		if (rURL) 
-			NPN_MemFree(rURL);
 		if (code)
 			NPN_MemFree(code);
 	}
@@ -36,8 +33,8 @@ public:
                              NPVariant *result);
   virtual bool SetProperty(NPIdentifier name, const NPVariant *value);
 private:
+	// define ScriptablePluginObject vars here
 	char* keyword;
-	char* rURL;
 	char* code;
 };
 
